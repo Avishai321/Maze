@@ -1,30 +1,364 @@
 package org.example;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.text.DefaultFormatter;
 import java.awt.*;
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.text.ParseException;
 
 public class SettingsPanel extends JPanel {
+    private JLabel wallCellColorValue;
+    private JLabel pathColorValue;
+    private JLabel drawGridValue;
+    private JLabel gridColorValue;
+    private JLabel animationDelayValue;
+
+    private JSpinner widthSpinner;
+    private JSpinner heightSpinner;
+
+    private static final Color COLOR_BACKGROUND = new Color(35, 35, 35);
+    private static final Color COLOR_PANEL_BG = new Color(45, 45, 45);
+    private static final Color COLOR_LOADING = new Color(220, 180, 50);
+    private static final Color COLOR_SUCCESS = new Color(100, 220, 100);
+    private static final Color COLOR_ERROR = new Color(255, 100, 100);
+    private static final Color COLOR_TEXT_KEY = new Color(180, 180, 180);
+
+    private static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, 22);
+    private static final Font FONT_KEY = new Font("Segoe UI", Font.PLAIN, 18);
+    private static final Font FONT_VALUE = new Font("Segoe UI", Font.BOLD, 18);
+
     public SettingsPanel() {
         setPreferredSize(new Dimension(AppConfig.WIDTH, AppConfig.HEIGHT));
-        setBackground(Color.DARK_GRAY);
+        setBackground(COLOR_BACKGROUND);
+        setLayout(new GridBagLayout());
 
-        try (HttpClient client = HttpClient.newBuilder().build()) {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://backend-qcf9.onrender.com/fm1/get-render-config"))
-                    .build();
+        initializeUI();
+        refetchConfigs();
+    }
 
-            try {
-                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                System.out.println(response.body());
-            } catch (InterruptedException | IOException e) {
-                throw new RuntimeException(e);
+    private void initializeUI() {
+        JPanel unifiedGroup = new JPanel(new BorderLayout());
+        unifiedGroup.setBackground(COLOR_PANEL_BG);
+        unifiedGroup.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder(
+                        BorderFactory.createLineBorder(new Color(80, 80, 80), 2, true),
+                        " Configurations & Map Settings ",
+                        TitledBorder.CENTER,
+                        TitledBorder.TOP,
+                        FONT_TITLE,
+                        Color.WHITE
+                ),
+                new EmptyBorder(20, 30, 30, 30)
+        ));
+
+        JPanel contentSplitter = new JPanel(new GridLayout(1, 2, 40, 0));
+        contentSplitter.setOpaque(false);
+
+        contentSplitter.add(createServerColumn());
+        contentSplitter.add(createLocalColumn());
+
+        unifiedGroup.add(contentSplitter, BorderLayout.CENTER);
+        unifiedGroup.add(createActionButtons(), BorderLayout.SOUTH);
+
+        GridBagConstraints mainConstraints = new GridBagConstraints();
+        mainConstraints.fill = GridBagConstraints.BOTH;
+        mainConstraints.weightx = 1.0;
+        mainConstraints.weighty = 1.0;
+        mainConstraints.insets = new Insets(40, 40, 40, 40);
+        add(unifiedGroup, mainConstraints);
+    }
+
+    private JPanel createServerColumn() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setOpaque(false);
+
+        GridBagConstraints cKey = new GridBagConstraints();
+        cKey.gridx = 0;
+        cKey.anchor = GridBagConstraints.WEST;
+        cKey.weightx = 1.0;
+        cKey.insets = new Insets(15, 10, 15, 0);
+
+        GridBagConstraints cVal = new GridBagConstraints();
+        cVal.gridx = 1;
+        cVal.anchor = GridBagConstraints.EAST;
+        cVal.weightx = 0.0;
+        cVal.insets = new Insets(15, 0, 15, 10);
+
+        // --- Row 0: Wall Cell Color ---
+        cKey.gridy = 0;
+        cVal.gridy = 0;
+        panel.add(createKeyLabel("Wall Cell Color:"), cKey);
+        wallCellColorValue = createValueLabel();
+        panel.add(wallCellColorValue, cVal);
+
+        // --- Row 1: Path Color ---
+        cKey.gridy = 1;
+        cVal.gridy = 1;
+        panel.add(createKeyLabel("Path Color:"), cKey);
+        pathColorValue = createValueLabel();
+        panel.add(pathColorValue, cVal);
+
+        // --- Row 2: Draw Grid ---
+        cKey.gridy = 2;
+        cVal.gridy = 2;
+        panel.add(createKeyLabel("Draw Grid:"), cKey);
+        drawGridValue = createValueLabel();
+        panel.add(drawGridValue, cVal);
+
+        // --- Row 3: Grid Color ---
+        cKey.gridy = 3;
+        cVal.gridy = 3;
+        panel.add(createKeyLabel("Grid Color:"), cKey);
+        gridColorValue = createValueLabel();
+        panel.add(gridColorValue, cVal);
+
+        // --- Row 4: Animation Delay ---
+        cKey.gridy = 4;
+        cVal.gridy = 4;
+        panel.add(createKeyLabel("Animation Delay:"), cKey);
+        animationDelayValue = createValueLabel();
+        panel.add(animationDelayValue, cVal);
+
+        // Filler to push rows to the top
+        GridBagConstraints fillerC = new GridBagConstraints();
+        fillerC.gridx = 0;
+        fillerC.gridy = 5;
+        fillerC.gridwidth = 2;
+        fillerC.weighty = 1.0;
+        panel.add(Box.createVerticalGlue(), fillerC);
+
+        return panel;
+    }
+
+    private JPanel createLocalColumn() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setOpaque(false);
+
+        GridBagConstraints cLabel = new GridBagConstraints();
+        cLabel.gridx = 0;
+        cLabel.anchor = GridBagConstraints.EAST;
+        cLabel.insets = new Insets(15, 10, 15, 10);
+
+        GridBagConstraints cSpinner = new GridBagConstraints();
+        cSpinner.gridx = 1;
+        cSpinner.anchor = GridBagConstraints.WEST;
+        cSpinner.insets = new Insets(15, 10, 15, 10);
+
+        // --- Row 0: Width ---
+        cLabel.gridy = 0;
+        cSpinner.gridy = 0;
+        panel.add(createKeyLabel("Maze Width:"), cLabel);
+        widthSpinner = createStrictSpinner();
+        panel.add(widthSpinner, cSpinner);
+
+        // --- Row 1: Height ---
+        cLabel.gridy = 1;
+        cSpinner.gridy = 1;
+        panel.add(createKeyLabel("Maze Height:"), cLabel);
+        heightSpinner = createStrictSpinner();
+        panel.add(heightSpinner, cSpinner);
+
+        // Filler to push rows to the top
+        GridBagConstraints fillerC = new GridBagConstraints();
+        fillerC.gridx = 0;
+        fillerC.gridy = 2;
+        fillerC.gridwidth = 2;
+        fillerC.weighty = 1.0;
+        panel.add(Box.createVerticalGlue(), fillerC);
+
+        return panel;
+    }
+
+    private JPanel createActionButtons() {
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 0));
+        buttonPanel.setOpaque(false);
+        buttonPanel.setBorder(new EmptyBorder(30, 0, 0, 0));
+
+        JButton refreshButton = createStyledButton("Refresh Configs", new Dimension(180, 45), false);
+        refreshButton.addActionListener(e -> refetchConfigs());
+
+        JButton getMazeButton = createStyledButton("Get Maze", new Dimension(180, 45), true);
+        getMazeButton.addActionListener(e -> {
+            commitSpinnerEdit(widthSpinner);
+            commitSpinnerEdit(heightSpinner);
+
+            int selectedWidth = (int) widthSpinner.getValue();
+            int selectedHeight = (int) heightSpinner.getValue();
+
+            RenderConfig currentConfig = AppConfig.getRenderConfig();
+            if (currentConfig == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Please wait for configurations to load before generating a maze.",
+                        "Configuration Pending",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            AppConfig.setMazeDimensions(selectedWidth, selectedHeight);
+            System.out.println("Generating Maze | Width: " + selectedWidth + ", Height: " + selectedHeight);
+            // TODO: Proceed with maze generation logic
+        });
+
+        buttonPanel.add(refreshButton);
+        buttonPanel.add(getMazeButton);
+
+        return buttonPanel;
+    }
+
+    private JLabel createKeyLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(FONT_KEY);
+        label.setForeground(COLOR_TEXT_KEY);
+        return label;
+    }
+
+    private JLabel createValueLabel() {
+        JLabel label = new JLabel("Loading...");
+        label.setFont(FONT_VALUE);
+        label.setForeground(COLOR_LOADING);
+        return label;
+    }
+
+    private JSpinner createStrictSpinner() {
+        SpinnerNumberModel model = new SpinnerNumberModel(
+                AppConfig.DEFAULT_MAZE_WIDTH,
+                AppConfig.MIN_MAZE_WIDTH,
+                AppConfig.MAX_MAZE_WIDTH,
+                1
+        );
+        JSpinner spinner = new JSpinner(model);
+        spinner.setFont(FONT_VALUE);
+        spinner.setPreferredSize(new Dimension(100, 35));
+
+        JSpinner.DefaultEditor editor = (JSpinner.DefaultEditor) spinner.getEditor();
+        JFormattedTextField textField = editor.getTextField();
+        textField.setHorizontalAlignment(JTextField.CENTER);
+        textField.setBackground(new Color(60, 60, 60));
+        textField.setForeground(Color.WHITE);
+        textField.setCaretColor(Color.WHITE);
+
+        DefaultFormatter formatter = (DefaultFormatter) textField.getFormatter();
+        formatter.setCommitsOnValidEdit(true);
+        formatter.setAllowsInvalid(false);
+
+        return spinner;
+    }
+
+    private void commitSpinnerEdit(JSpinner spinner) {
+        try {
+            spinner.commitEdit();
+        } catch (ParseException ex) {
+            JComponent editor = spinner.getEditor();
+            if (editor instanceof JSpinner.DefaultEditor) {
+                ((JSpinner.DefaultEditor) editor).getTextField().setValue(spinner.getValue());
             }
         }
+    }
 
+    private JButton createStyledButton(String text, Dimension size, boolean isPrimary) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        button.setFocusable(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setPreferredSize(size);
+
+        if (isPrimary) {
+            button.setBackground(new Color(60, 120, 200));
+            button.setForeground(Color.WHITE);
+        }
+        return button;
+    }
+
+    public void refetchConfigs() {
+        setAllLabels("Loading...", COLOR_LOADING);
+
+        ConfigService.fetchRenderConfig(new ConfigService.ConfigCallback() {
+            @Override
+            public void onSuccess(RenderConfig config) {
+                AppConfig.setRenderConfig(config);
+                SwingUtilities.invokeLater(() -> updateUIWithData(config));
+            }
+
+            @Override
+            public void onError(Exception e) {
+                SwingUtilities.invokeLater(() -> setAllLabels("Connection Error", COLOR_ERROR));
+            }
+        });
+    }
+
+    private void updateUIWithData(RenderConfig config) {
+        if (config == null) {
+            setAllLabels("Connection Error", COLOR_ERROR);
+            return;
+        }
+
+        updateColorLabel(wallCellColorValue, config.getWallCellColor());
+        updateColorLabel(pathColorValue, config.getPathColor());
+        updateColorLabel(gridColorValue, config.getGridColor());
+
+        updateSingleLabel(drawGridValue, String.valueOf(config.isDrawGrid()));
+        updateSingleLabel(animationDelayValue, config.getAnimationDelayMs() + " ms");
+    }
+
+    private void updateSingleLabel(JLabel label, String text) {
+        label.setText(text != null ? text : "N/A");
+        label.setForeground(COLOR_SUCCESS);
+        label.setIcon(null); // Ensure no icon is drawn for plain text
+    }
+
+    private void updateColorLabel(JLabel label, String hexCode) {
+        label.setText(hexCode != null ? hexCode : "N/A");
+        label.setForeground(COLOR_SUCCESS);
+
+        Color parsedColor = safeParseColor(hexCode);
+        if (parsedColor != null) {
+            label.setIcon(new ColorIcon(16, 16, parsedColor));
+            label.setIconTextGap(8);
+        } else {
+            label.setIcon(null);
+        }
+    }
+
+    private void setAllLabels(String text, Color color) {
+        // Reset text, color, and wipe out the swatches when loading/erroring
+        JLabel[] allLabels = {wallCellColorValue, pathColorValue, drawGridValue, gridColorValue, animationDelayValue};
+        for (JLabel label : allLabels) {
+            label.setText(text);
+            label.setForeground(color);
+            label.setIcon(null);
+        }
+    }
+
+    private Color safeParseColor(String colorStr) {
+        if (colorStr == null || colorStr.trim().isEmpty()) return null;
+        try {
+            return Color.decode(colorStr);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private record ColorIcon(int width, int height, Color color) implements Icon {
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            // Draw the inner filled color
+            g.setColor(color);
+            g.fillRect(x, y, width, height);
+
+            // Draw a tiny white border so very dark colors don't vanish into the background
+            g.setColor(new Color(150, 150, 150));
+            g.drawRect(x, y, width - 1, height - 1);
+        }
+
+        @Override
+        public int getIconWidth() {
+            return width;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return height;
+        }
     }
 }

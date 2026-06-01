@@ -1,12 +1,31 @@
 package org.example;
 
 public final class AppConfig {
+    public static final String APP_TITLE = "Maze";
+    public static final String CONFIG_URL = "https://backend-qcf9.onrender.com/fm1/get-render-config";
+
     public static final int WIDTH = 800;
     public static final int HEIGHT = 800;
-    public static final String APP_TITLE = "Maze";
-    public static final String SERVER_URL = "https://backend-qcf9.onrender.com/fm1/get-render-config";
 
-    private AppConfig() {
-        throw new UnsupportedOperationException("Utility class");
+    private static RenderConfig currentRenderConfig;
+
+    public static final int DEFAULT_MAZE_WIDTH = 30;
+    public static final int MIN_MAZE_WIDTH = 5;
+    public static final int MAX_MAZE_WIDTH = 100;
+
+    private static int mazeWidth;
+    private static int mazeHeight;
+
+    private AppConfig() { throw new UnsupportedOperationException("Utility class"); }
+
+    public static void setRenderConfig( RenderConfig config) {currentRenderConfig = config; }
+    public static RenderConfig getRenderConfig() { return currentRenderConfig; }
+
+    public static void setMazeDimensions(int width, int height) {
+        mazeWidth = width;
+        mazeHeight = height;
     }
+
+    public static int getMazeWidth() { return mazeWidth; }
+    public static int getMazeHeight() { return mazeHeight; }
 }

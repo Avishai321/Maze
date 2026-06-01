@@ -11,6 +11,7 @@ public class Main {
             window.setResizable(false);
 
             window.add(new SettingsPanel());
+
             window.pack();
             window.setLocationRelativeTo(null);
 
