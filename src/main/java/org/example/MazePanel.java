@@ -11,7 +11,7 @@ import java.net.URI;
 public class MazePanel extends JPanel {
     private int mazeWidth;
     private int mazeHeight;
-    private RenderConfig serverConfigs;
+    private RenderConfig renderConfig;
 
     public MazePanel() {
         setBackground(AppConfig.COLOR_BACKGROUND);
@@ -32,7 +32,7 @@ public class MazePanel extends JPanel {
             return;
         }
 
-        this.serverConfigs = config;
+        this.renderConfig = config;
         this.mazeWidth = AppConfig.getMazeWidth();
         this.mazeHeight = AppConfig.getMazeHeight();
 
@@ -40,36 +40,34 @@ public class MazePanel extends JPanel {
         BufferedImage image;
 
         try {
-            long start = System.currentTimeMillis();
-            image = ImageIO.read(URI.create(url).toURL()); //todo make it async or something, it must be faster
-            long end = System.currentTimeMillis();
-            System.out.println("Image load time: " + (end - start) + "ms"); // It takes around 1500 millis for a 100x100 maze
+            image = ImageIO.read(URI.create(url).toURL());
 
             boolean[][] map = new boolean[mazeHeight][mazeWidth];
             int cellWidth = image.getWidth() / AppConfig.getMazeWidth();
             int cellHeight = image.getHeight() / AppConfig.getMazeHeight();
-            int modifiedCellColor = Color.decode(serverConfigs.getWallCellColor()).getRGB();
 
-            start = System.currentTimeMillis();
-            for (int y = 0; y < AppConfig.getMazeHeight(); y++) {
-                for (int x = 0; x < AppConfig.getMazeWidth(); x++) {
-                    Color color = new Color(image.getRGB(x * cellWidth, y * cellHeight));
-                    boolean isWhite = color.equals(Color.WHITE);
-                    map[y][x] = isWhite;
+            Graphics2D g2d = image.createGraphics();
 
-                    if (!isWhite) {
-                        //TODO optimize this loop, I just need a rectangle at the size of a cell
-                        // changing it pixel by pixel takes too much
-                        for (int row = y * cellHeight; row < (y * cellHeight) + cellHeight; row++) {
-                            for (int col = x * cellWidth; col < (x * cellWidth) + cellWidth; col++) {
-                                image.setRGB(col, row, modifiedCellColor);
-                            }
-                        }
-                    }
+            g2d.setColor(Color.decode(renderConfig.getWallCellColor()));
+            for (int row = 0; row < image.getHeight(); row += cellHeight) {
+                for (int col = 0; col < image.getWidth(); col += cellWidth) {
+                    Color currentColor = new Color(image.getRGB(col, row));
+                    boolean isWhite = currentColor.equals(Color.WHITE);
+
+                    map[row / cellHeight][col / cellWidth] = isWhite;
+                    if (!isWhite) g2d.fillRect(col, row, cellWidth, cellHeight);
                 }
             }
-            end = System.currentTimeMillis();
-            System.out.println("Color conversion: " + (end - start) + "ms");
+
+            if (renderConfig.isDrawGrid()) {
+                g2d.setColor(Color.decode(renderConfig.getGridColor()));
+                for (int row = 0; row < image.getHeight(); row += cellHeight) {
+                    g2d.drawLine(0, row, image.getWidth(), row);
+                }
+                for (int col = 0; col < image.getWidth(); col += cellWidth) {
+                    g2d.drawLine(col, 0, col, image.getHeight());
+                }
+            }
 
             File outputFile = new File("saved_image.jpg");
             ImageIO.write(image, "jpg", outputFile);
