@@ -330,13 +330,10 @@ public class SettingsPanel extends JPanel {
         if (parsedColor != null) {
             label.setIcon(new ColorIcon(16, 16, parsedColor));
             label.setIconTextGap(8);
-        } else {
-            label.setIcon(null);
-        }
+        } else label.setIcon(null);
     }
 
     private void setAllLabels(String text, Color color) {
-        // Reset text, color, and wipe out the swatches when loading/erroring
         JLabel[] allLabels = {wallCellColorValue, pathColorValue, drawGridValue, gridColorValue, animationDelayValue};
         for (JLabel label : allLabels) {
             label.setText(text);
@@ -357,11 +354,9 @@ public class SettingsPanel extends JPanel {
     private record ColorIcon(int width, int height, Color color) implements Icon {
         @Override
         public void paintIcon(Component c, Graphics g, int x, int y) {
-            // Draw the inner filled color
             g.setColor(color);
             g.fillRect(x, y, width, height);
 
-            // Draw a tiny white border so very dark colors don't vanish into the background
             g.setColor(new Color(150, 150, 150));
             g.drawRect(x, y, width - 1, height - 1);
         }

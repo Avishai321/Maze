@@ -11,7 +11,6 @@ public class ConfigService {
     private static final HttpClient client = HttpClient.newHttpClient();
     private static final Gson gson = new Gson();
 
-    // Callback interface to talk back to the UI
     public interface ConfigCallback {
         void onSuccess(RenderConfig config);
         void onError(Exception e);
