@@ -39,7 +39,8 @@ public class Main {
         cardLayout.show(panels, scene);
 
         if (scene.equals(MAZE_PANEL)) {
-            mazePanel.loadConfigs();
+            // not the most beautiful thing in the world, but it works
+            mazePanel.initialize();
         }
     }
 }
