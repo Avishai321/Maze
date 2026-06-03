@@ -14,7 +14,6 @@ public class MazePanel extends JPanel {
         JButton backButton = new JButton("Back");
         backButton.setFocusable(false);
         backButton.addActionListener(e -> Main.changeScene(Main.SETTINGS_PANEL));
-
         add(backButton);
     }
 

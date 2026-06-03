@@ -19,6 +19,9 @@ public class SettingsPanel extends JPanel {
     private JSpinner widthSpinner;
     private JSpinner heightSpinner;
 
+    private JButton getMazeButton;
+    private JButton refreshButton;
+
     private static final Color COLOR_PANEL_BG = new Color(45, 45, 45);
     private static final Color COLOR_LOADING = new Color(220, 180, 50);
     private static final Color COLOR_SUCCESS = new Color(100, 220, 100);
@@ -176,10 +179,10 @@ public class SettingsPanel extends JPanel {
         buttonPanel.setOpaque(false);
         buttonPanel.setBorder(new EmptyBorder(30, 0, 0, 0));
 
-        JButton refreshButton = createStyledButton("Refresh Configs", new Dimension(180, 45), false);
+        refreshButton = createStyledButton("Refresh Configs", new Dimension(180, 45), false);
         refreshButton.addActionListener(e -> refetchConfigs());
 
-        JButton getMazeButton = createStyledButton("Get Maze", new Dimension(180, 45), true);
+        getMazeButton = createStyledButton("Get Maze", new Dimension(180, 45), true);
         getMazeButton.addActionListener(e -> {
             commitSpinnerEdit(widthSpinner);
             commitSpinnerEdit(heightSpinner);
@@ -199,11 +202,17 @@ public class SettingsPanel extends JPanel {
             AppConfig.setMazeDimensions(selectedWidth, selectedHeight);
             Main.changeScene(Main.MAZE_PANEL);
         });
+        getMazeButton.setEnabled(false);
 
         buttonPanel.add(refreshButton);
         buttonPanel.add(getMazeButton);
 
         return buttonPanel;
+    }
+
+    private void setActionButtonsEnable(boolean enable) {
+        refreshButton.setEnabled(enable);
+        getMazeButton.setEnabled(enable);
     }
 
     private JLabel createKeyLabel(String text) {
@@ -272,6 +281,7 @@ public class SettingsPanel extends JPanel {
 
     public void refetchConfigs() {
         setAllLabels("Loading...", COLOR_LOADING);
+        setActionButtonsEnable(false);
 
         ConfigService.fetchRenderConfig(new ConfigService.ConfigCallback() {
             @Override
@@ -283,6 +293,11 @@ public class SettingsPanel extends JPanel {
             @Override
             public void onError(Exception e) {
                 SwingUtilities.invokeLater(() -> setAllLabels("Connection Error", COLOR_ERROR));
+            }
+
+            @Override
+            public void onFinished() {
+                setActionButtonsEnable(true);
             }
         });
     }
