@@ -14,7 +14,6 @@ public class ConfigService {
     public interface ConfigCallback {
         void onSuccess(RenderConfig config);
         void onError(Exception e);
-        void onFinished();
     }
 
     public static void fetchRenderConfig(ConfigCallback callback) {
@@ -31,8 +30,6 @@ public class ConfigService {
                         callback.onSuccess(config);
                     } catch (Exception e) {
                         callback.onError(e);
-                    } finally {
-                        callback.onFinished();
                     }
                 })
                 .exceptionally(e -> {

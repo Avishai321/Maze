@@ -4,11 +4,10 @@ import java.awt.*;
 
 public final class AppConfig {
     public static final String APP_TITLE = "Maze";
+    public static final Dimension BOARD_SIZE = new Dimension(800, 800);
+
     public static final String CONFIG_URL = "https://backend-qcf9.onrender.com/fm1/get-render-config";
     public static final String BASE_IMAGE_URL = "https://backend-qcf9.onrender.com/fm1/get-maze-image";
-
-    public static final int BOARD_WIDTH = 800;
-    public static final int BOARD_HEIGHT = 800;
 
     private static RenderConfig currentRenderConfig;
 
@@ -20,6 +19,9 @@ public final class AppConfig {
     private static int mazeHeight = -1;
 
     public static final Color COLOR_BACKGROUND = new Color(35, 35, 35);
+    public static final Color COLOR_PRIMARY_BUTTON_BACKGROUND = new Color(60, 120, 200);
+    public static final Dimension SIZE_BUTTON = new Dimension(180, 45);
+    public static final Font FONT_BUTTON = new Font("Segoe UI", Font.BOLD, 18);
 
     private AppConfig() {
         throw new UnsupportedOperationException("Utility class");

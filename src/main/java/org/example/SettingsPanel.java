@@ -33,7 +33,7 @@ public class SettingsPanel extends JPanel {
     private static final Font FONT_VALUE = new Font("Segoe UI", Font.BOLD, 18);
 
     public SettingsPanel() {
-        setPreferredSize(new Dimension(AppConfig.BOARD_WIDTH, AppConfig.BOARD_HEIGHT));
+        setPreferredSize(AppConfig.BOARD_SIZE);
         setBackground(COLOR_BACKGROUND);
         setLayout(new GridBagLayout());
 
@@ -179,10 +179,10 @@ public class SettingsPanel extends JPanel {
         buttonPanel.setOpaque(false);
         buttonPanel.setBorder(new EmptyBorder(30, 0, 0, 0));
 
-        refreshButton = createStyledButton("Refresh Configs", new Dimension(180, 45), false);
+        refreshButton = new StyledButton("Refresh Config", false);
         refreshButton.addActionListener(e -> refetchConfigs());
 
-        getMazeButton = createStyledButton("Get Maze", new Dimension(180, 45), true);
+        getMazeButton = new StyledButton("Get Maze", true);
         getMazeButton.addActionListener(e -> {
             commitSpinnerEdit(widthSpinner);
             commitSpinnerEdit(heightSpinner);
@@ -265,20 +265,6 @@ public class SettingsPanel extends JPanel {
         }
     }
 
-    private JButton createStyledButton(String text, Dimension size, boolean isPrimary) {
-        JButton button = new JButton(text);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        button.setFocusable(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setPreferredSize(size);
-
-        if (isPrimary) {
-            button.setBackground(new Color(60, 120, 200));
-            button.setForeground(Color.WHITE);
-        }
-        return button;
-    }
-
     public void refetchConfigs() {
         setAllLabels("Loading...", COLOR_LOADING);
         setActionButtonsEnable(false);
@@ -287,17 +273,13 @@ public class SettingsPanel extends JPanel {
             @Override
             public void onSuccess(RenderConfig config) {
                 AppConfig.setRenderConfig(config);
+                setActionButtonsEnable(true);
                 SwingUtilities.invokeLater(() -> updateUIWithData(config));
             }
 
             @Override
             public void onError(Exception e) {
                 SwingUtilities.invokeLater(() -> setAllLabels("Connection Error", COLOR_ERROR));
-            }
-
-            @Override
-            public void onFinished() {
-                setActionButtonsEnable(true);
             }
         });
     }
