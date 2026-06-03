@@ -22,10 +22,10 @@ public class MazeSolver {
 
         fetchImage();
         processImage();
-        saveImageToFile("maze_image", "jpg");
+        saveImageToFile();
     }
 
-    public void fetchImage() {
+    private void fetchImage() {
         String url = AppConfig.BASE_IMAGE_URL + "?width=" + mazeWidth + "&height=" + mazeHeight;
         try {
             image = ImageIO.read(URI.create(url).toURL());
@@ -34,7 +34,7 @@ public class MazeSolver {
         }
     }
 
-    public void processImage() {
+    private void processImage() {
         mazeMap = new boolean[mazeHeight][mazeWidth];
         int cellWidth = image.getWidth() / AppConfig.getMazeWidth();
         int cellHeight = image.getHeight() / AppConfig.getMazeHeight();
@@ -63,10 +63,10 @@ public class MazeSolver {
         }
     }
 
-    public void saveImageToFile(String fileName, String extension) {
-        File outputFile = new File(fileName + "." + extension);
+    private void saveImageToFile() {
+        File outputFile = new File("maze_image.jpg");
         try {
-            ImageIO.write(image, extension, outputFile);
+            ImageIO.write(image, "jpg", outputFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
