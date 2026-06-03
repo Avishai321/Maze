@@ -6,14 +6,21 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MazeSolver {
     private int mazeWidth;
     private int mazeHeight;
     private RenderConfig renderConfig;
 
-    BufferedImage image;
+    private BufferedImage image;
+
     boolean[][] mazeMap;
+    private boolean[][] path;
+
+    private boolean solutionFound;
+    private List<Point> pathIndexes;
 
     public void initialize() {
         this.renderConfig = AppConfig.getRenderConfig();
@@ -23,6 +30,7 @@ public class MazeSolver {
         fetchImage();
         processImage();
         saveImageToFile();
+        findPath();
     }
 
     private void fetchImage() {
@@ -70,5 +78,46 @@ public class MazeSolver {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private boolean pathFinderHelper(int row, int col, boolean[][] visited) {
+        if (row < 0 || row > mazeMap.length || col < 0 || col > mazeMap[0].length) return false;
+        if (!mazeMap[row][col] || visited[row][col]) return false;
+
+        visited[row][col] = true;
+
+        if (row == mazeMap.length - 1 && col == mazeMap[0].length - 1) {
+            path[row][col] = true;
+            pathIndexes.add(new Point(col, row));
+            return true;
+        }
+
+        if (pathFinderHelper(row, col + 1, visited) ||
+                pathFinderHelper(row, col - 1, visited) ||
+                pathFinderHelper(row + 1, col, visited) ||
+                pathFinderHelper(row - 1, col, visited)) {
+
+            path[row][col] = true;
+            pathIndexes.add(new Point(col, row));
+            return true;
+        }
+
+        return false;
+    }
+
+    private void findPath() {
+        path = new boolean[mazeMap.length][mazeMap[0].length];
+        pathIndexes = new ArrayList<>();
+
+        solutionFound = pathFinderHelper(0, 0, new boolean[mazeMap.length][mazeMap[0].length]);
+        if (solutionFound) pathIndexes = pathIndexes.reversed();
+    }
+
+    public boolean hasSolution() {
+        return path != null && solutionFound;
+    }
+
+    public List<Point> getPathIndexes() {
+        return pathIndexes;
     }
 }
