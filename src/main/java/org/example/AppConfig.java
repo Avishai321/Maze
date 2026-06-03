@@ -16,21 +16,33 @@ public final class AppConfig {
     public static final int MIN_MAZE_WIDTH = 5;
     public static final int MAX_MAZE_WIDTH = 100;
 
-    private static int mazeWidth;
-    private static int mazeHeight;
+    private static int mazeWidth = -1;
+    private static int mazeHeight = -1;
 
     public static final Color COLOR_BACKGROUND = new Color(35, 35, 35);
 
-    private AppConfig() { throw new UnsupportedOperationException("Utility class"); }
+    private AppConfig() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
-    public static void setRenderConfig( RenderConfig config) {currentRenderConfig = config; }
-    public static RenderConfig getRenderConfig() { return currentRenderConfig; }
+    public static void setRenderConfig(RenderConfig config) {
+        currentRenderConfig = config;
+    }
+
+    public static RenderConfig getRenderConfig() {
+        return currentRenderConfig;
+    }
 
     public static void setMazeDimensions(int width, int height) {
         mazeWidth = width;
         mazeHeight = height;
     }
 
-    public static int getMazeWidth() { return mazeWidth; }
-    public static int getMazeHeight() { return mazeHeight; }
+    public static int getMazeWidth() {
+        return mazeWidth;
+    }
+
+    public static int getMazeHeight() {
+        return mazeHeight;
+    }
 }
