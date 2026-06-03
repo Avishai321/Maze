@@ -1,11 +1,14 @@
 package org.example;
 
+import java.awt.*;
+
 public final class AppConfig {
     public static final String APP_TITLE = "Maze";
     public static final String CONFIG_URL = "https://backend-qcf9.onrender.com/fm1/get-render-config";
+    public static final String BASE_IMAGE_URL = "https://backend-qcf9.onrender.com/fm1/get-maze-image";
 
-    public static final int WIDTH = 800;
-    public static final int HEIGHT = 800;
+    public static final int BOARD_WIDTH = 800;
+    public static final int BOARD_HEIGHT = 800;
 
     private static RenderConfig currentRenderConfig;
 
@@ -15,6 +18,8 @@ public final class AppConfig {
 
     private static int mazeWidth;
     private static int mazeHeight;
+
+    public static final Color COLOR_BACKGROUND = new Color(35, 35, 35);
 
     private AppConfig() { throw new UnsupportedOperationException("Utility class"); }
 

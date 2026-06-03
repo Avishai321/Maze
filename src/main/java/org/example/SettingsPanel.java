@@ -7,6 +7,8 @@ import javax.swing.text.DefaultFormatter;
 import java.awt.*;
 import java.text.ParseException;
 
+import static org.example.AppConfig.COLOR_BACKGROUND;
+
 public class SettingsPanel extends JPanel {
     private JLabel wallCellColorValue;
     private JLabel pathColorValue;
@@ -17,7 +19,6 @@ public class SettingsPanel extends JPanel {
     private JSpinner widthSpinner;
     private JSpinner heightSpinner;
 
-    private static final Color COLOR_BACKGROUND = new Color(35, 35, 35);
     private static final Color COLOR_PANEL_BG = new Color(45, 45, 45);
     private static final Color COLOR_LOADING = new Color(220, 180, 50);
     private static final Color COLOR_SUCCESS = new Color(100, 220, 100);
@@ -29,7 +30,7 @@ public class SettingsPanel extends JPanel {
     private static final Font FONT_VALUE = new Font("Segoe UI", Font.BOLD, 18);
 
     public SettingsPanel() {
-        setPreferredSize(new Dimension(AppConfig.WIDTH, AppConfig.HEIGHT));
+        setPreferredSize(new Dimension(AppConfig.BOARD_WIDTH, AppConfig.BOARD_HEIGHT));
         setBackground(COLOR_BACKGROUND);
         setLayout(new GridBagLayout());
 
@@ -196,8 +197,7 @@ public class SettingsPanel extends JPanel {
             }
 
             AppConfig.setMazeDimensions(selectedWidth, selectedHeight);
-            System.out.println("Generating Maze | Width: " + selectedWidth + ", Height: " + selectedHeight);
-            // TODO: Proceed with maze generation logic
+            Main.changeScene(Main.MAZE_PANEL);
         });
 
         buttonPanel.add(refreshButton);

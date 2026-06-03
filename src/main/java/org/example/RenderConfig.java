@@ -3,7 +3,6 @@ package org.example;
 import com.google.gson.annotations.SerializedName;
 
 public class RenderConfig {
-
     @SerializedName("wallCellColor")
     private String wallCellColor;
 
