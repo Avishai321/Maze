@@ -40,20 +40,40 @@ public class MazePanel extends JPanel {
         BufferedImage image;
 
         try {
+            long start = System.currentTimeMillis();
             image = ImageIO.read(URI.create(url).toURL()); //todo make it async or something, it must be faster
-            File outputFile = new File("saved_image.jpg");
-            ImageIO.write(image, "jpg", outputFile);
+            long end = System.currentTimeMillis();
+            System.out.println("Image load time: " + (end - start) + "ms"); // It takes around 1500 millis for a 100x100 maze
 
             boolean[][] map = new boolean[mazeHeight][mazeWidth];
             int cellWidth = image.getWidth() / AppConfig.getMazeWidth();
             int cellHeight = image.getHeight() / AppConfig.getMazeHeight();
+            int modifiedCellColor = Color.decode(serverConfigs.getWallCellColor()).getRGB();
 
+            start = System.currentTimeMillis();
             for (int y = 0; y < AppConfig.getMazeHeight(); y++) {
                 for (int x = 0; x < AppConfig.getMazeWidth(); x++) {
                     Color color = new Color(image.getRGB(x * cellWidth, y * cellHeight));
-                    map[y][x] = color.equals(Color.WHITE);
+                    boolean isWhite = color.equals(Color.WHITE);
+                    map[y][x] = isWhite;
+
+                    if (!isWhite) {
+                        //TODO optimize this loop, I just need a rectangle at the size of a cell
+                        // changing it pixel by pixel takes too much
+                        for (int row = y * cellHeight; row < (y * cellHeight) + cellHeight; row++) {
+                            for (int col = x * cellWidth; col < (x * cellWidth) + cellWidth; col++) {
+                                image.setRGB(col, row, modifiedCellColor);
+                            }
+                        }
+                    }
                 }
             }
+            end = System.currentTimeMillis();
+            System.out.println("Color conversion: " + (end - start) + "ms");
+
+            File outputFile = new File("saved_image.jpg");
+            ImageIO.write(image, "jpg", outputFile);
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
