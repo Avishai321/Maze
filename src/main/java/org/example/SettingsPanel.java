@@ -279,6 +279,7 @@ public class SettingsPanel extends JPanel {
 
             @Override
             public void onError(Exception e) {
+                refreshButton.setEnabled(true);
                 SwingUtilities.invokeLater(() -> setAllLabels("Connection Error", COLOR_ERROR));
             }
         });
