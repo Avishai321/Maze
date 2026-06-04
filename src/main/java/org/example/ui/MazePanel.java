@@ -19,6 +19,7 @@ public class MazePanel extends JPanel {
     private MazeCanvas mazeCanvas;
     private JButton solveButton;
     private JButton backButton;
+    private JLabel statusLabel; // New Label
     private Timer solveAnimation;
 
     private boolean[][] currentMazeMap;
@@ -47,8 +48,14 @@ public class MazePanel extends JPanel {
 
         controlPanel.add(backButton);
         controlPanel.add(solveButton);
-
         add(controlPanel, BorderLayout.SOUTH);
+
+        statusLabel = new JLabel(" ");
+        statusLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        statusLabel.setForeground(new Color(255, 100, 100));
+        statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        statusLabel.setBorder(new EmptyBorder(15, 0, 0, 0));
+        add(statusLabel, BorderLayout.NORTH);
     }
 
     private JButton createBackButton() {
@@ -65,14 +72,11 @@ public class MazePanel extends JPanel {
         btn.setEnabled(false);
         btn.addActionListener(e -> {
             if (currentPath != null && !currentPath.isEmpty()) {
+                statusLabel.setText(" ");
                 btn.setEnabled(false);
                 mazeCanvas.resetAnimation();
                 startTimer();
-            } else {
-                JOptionPane.showMessageDialog(MazePanel.this,
-                        "There is no solution to this maze.",
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            }
+            } else statusLabel.setText("No path exists for this maze.");
         });
         return btn;
     }
@@ -91,16 +95,16 @@ public class MazePanel extends JPanel {
 
     private void startTimer() {
         setupTimer();
-
         int animationDelay = AppConfig.getRenderConfig().getAnimationDelayMs();
         solveAnimation.setDelay(animationDelay);
-
         solveAnimation.restart();
     }
 
     public void initialize() {
         solveButton.setEnabled(false);
         backButton.setEnabled(false);
+        statusLabel.setText(" ");
+        mazeCanvas.setMazeData(null, null);
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
@@ -125,7 +129,6 @@ public class MazePanel extends JPanel {
 
                 try {
                     get();
-
                     mazeCanvas.setMazeData(currentMazeMap, currentPath);
                     solveButton.setEnabled(true);
 
@@ -134,9 +137,7 @@ public class MazePanel extends JPanel {
                     Thread.currentThread().interrupt();
                 } catch (ExecutionException e) {
                     logger.log(Level.SEVERE, "Failed pipeline", e.getCause());
-                    JOptionPane.showMessageDialog(MazePanel.this,
-                            "Failed to load maze: " + e.getCause().getMessage(),
-                            "Error", JOptionPane.ERROR_MESSAGE);
+                    statusLabel.setText("Failed to load maze from server.");
                 }
             }
         };
