@@ -3,7 +3,6 @@ package org.example;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -29,7 +28,6 @@ public class MazeSolver {
 
         fetchImage();
         processImage();
-        saveImageToFile();
         findPath();
     }
 
@@ -71,15 +69,7 @@ public class MazeSolver {
         }
     }
 
-    private void saveImageToFile() {
-        File outputFile = new File("maze_image.jpg");
-        try {
-            ImageIO.write(image, "jpg", outputFile);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
+    //todo switch to BFS algorithm
     private boolean pathFinderHelper(int row, int col, boolean[][] visited) {
         if (row < 0 || row >= mazeMap.length || col < 0 || col >= mazeMap[0].length) return false;
         if (!mazeMap[row][col] || visited[row][col]) return false;
