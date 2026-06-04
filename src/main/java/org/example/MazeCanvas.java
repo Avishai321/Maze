@@ -7,11 +7,23 @@ import java.util.List;
 public class MazeCanvas extends JPanel {
     private final MazeSolver mazeSolver;
 
+    private Color cachedWallColor;
+    private Color cachedPathColor;
+    private Color cachedGridColor;
+
     private int currentFrameIndex = 0;
 
     public MazeCanvas(MazeSolver mazeSolver) {
         this.mazeSolver = mazeSolver;
         setOpaque(false);
+        cacheColors();
+    }
+
+    public void cacheColors() {
+        RenderConfig config = AppConfig.getRenderConfig();
+        cachedWallColor = Color.decode(config.getWallCellColor());
+        cachedPathColor = Color.decode(config.getPathColor());
+        cachedGridColor = Color.decode(config.getGridColor());
     }
 
     public void resetAnimation() {
@@ -52,7 +64,7 @@ public class MazeCanvas extends JPanel {
         int startY = (getHeight() - totalMazePixelHeight) / 2;
 
         RenderConfig config = AppConfig.getRenderConfig();
-        Color wallColor = Color.decode(config.getWallCellColor());
+        Color wallColor = cachedWallColor;
 
         for (int row = 0; row < mHeight; row++) {
             for (int col = 0; col < mWidth; col++) {
@@ -68,7 +80,7 @@ public class MazeCanvas extends JPanel {
             List<Index> pathIndexes = mazeSolver.getPathIndexes();
             int framesToDraw = Math.min(currentFrameIndex, pathIndexes.size());
 
-            g2d.setColor(Color.decode(AppConfig.getRenderConfig().getPathColor()));
+            g2d.setColor(cachedPathColor);
             for (int i = 0; i < framesToDraw; i++) {
                 Index point = pathIndexes.get(i);
                 int x = startX + (point.x * cellSize);
@@ -78,7 +90,7 @@ public class MazeCanvas extends JPanel {
         }
 
         if (config.isDrawGrid()) {
-            g2d.setColor(Color.decode(config.getGridColor()));
+            g2d.setColor(cachedGridColor);
             for (int row = 0; row <= mHeight; row++) {
                 int y = startY + (row * cellSize);
                 g2d.drawLine(startX, y, startX + totalMazePixelWidth, y);
