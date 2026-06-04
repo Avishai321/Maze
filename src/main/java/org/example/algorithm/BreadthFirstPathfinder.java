@@ -16,11 +16,13 @@ public class BreadthFirstPathfinder {
         Coordinate start = new Coordinate(0, 0);
         Coordinate end = new Coordinate(width - 1, height - 1);
 
-        int[][] directions = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
-        boolean found = false;
+        if (!mazeMap[start.y()][start.x()] || !mazeMap[end.y()][end.x()]) return Collections.emptyList();
 
         queue.add(start);
         visited[start.y()][start.x()] = true;
+
+        int[][] directions = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
+        boolean found = false;
 
         while (!queue.isEmpty()) {
             Coordinate current = queue.poll();
