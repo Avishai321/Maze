@@ -7,7 +7,6 @@ import org.example.network.ConfigService;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.text.DefaultFormatter;
 import java.awt.*;
 import java.text.ParseException;
 
@@ -157,14 +156,14 @@ public class SettingsPanel extends JPanel {
         cLabel.gridy = 0;
         cSpinner.gridy = 0;
         panel.add(createKeyLabel("Maze Width:"), cLabel);
-        widthSpinner = createStrictSpinner();
+        widthSpinner = createFlexibleSpinner();
         panel.add(widthSpinner, cSpinner);
 
         // --- Row 1: Height ---
         cLabel.gridy = 1;
         cSpinner.gridy = 1;
         panel.add(createKeyLabel("Maze Height:"), cLabel);
-        heightSpinner = createStrictSpinner();
+        heightSpinner = createFlexibleSpinner();
         panel.add(heightSpinner, cSpinner);
 
         // Filler to push rows to the top
@@ -191,8 +190,11 @@ public class SettingsPanel extends JPanel {
             commitSpinnerEdit(widthSpinner);
             commitSpinnerEdit(heightSpinner);
 
-            int selectedWidth = (int) widthSpinner.getValue();
-            int selectedHeight = (int) heightSpinner.getValue();
+            int selectedWidth = validateSpinner(widthSpinner);
+            int selectedHeight = validateSpinner(heightSpinner);
+
+            widthSpinner.setValue(selectedWidth);
+            heightSpinner.setValue(selectedHeight);
 
             RenderConfig currentConfig = AppConfig.getRenderConfig();
             if (currentConfig == null) {
@@ -233,11 +235,11 @@ public class SettingsPanel extends JPanel {
         return label;
     }
 
-    private JSpinner createStrictSpinner() {
+    private JSpinner createFlexibleSpinner() {
         SpinnerNumberModel model = new SpinnerNumberModel(
                 AppConfig.DEFAULT_MAZE_WIDTH,
-                AppConfig.MIN_MAZE_WIDTH,
-                AppConfig.MAX_MAZE_WIDTH,
+                Integer.MIN_VALUE,
+                Integer.MAX_VALUE,
                 1
         );
         JSpinner spinner = new JSpinner(model);
@@ -251,11 +253,17 @@ public class SettingsPanel extends JPanel {
         textField.setForeground(Color.WHITE);
         textField.setCaretColor(Color.WHITE);
 
-        DefaultFormatter formatter = (DefaultFormatter) textField.getFormatter();
-        formatter.setCommitsOnValidEdit(true);
-        formatter.setAllowsInvalid(false);
-
         return spinner;
+    }
+
+    private int validateSpinner(JSpinner spinner) {
+        try {
+            spinner.commitEdit();
+            int val = (Integer) spinner.getValue();
+            return Math.clamp(val, AppConfig.MIN_MAZE_WIDTH, AppConfig.MAX_MAZE_WIDTH);
+        } catch (ParseException e) {
+            return AppConfig.DEFAULT_MAZE_WIDTH;
+        }
     }
 
     private void commitSpinnerEdit(JSpinner spinner) {
