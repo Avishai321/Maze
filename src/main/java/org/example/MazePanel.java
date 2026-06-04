@@ -57,9 +57,15 @@ public class MazePanel extends JPanel {
         JButton btn = new StyledButton("Check Solution", true);
         btn.setEnabled(false);
         btn.addActionListener(e -> {
-            btn.setEnabled(false);
-            mazeCanvas.resetAnimation();
-            startTimer();
+            if (mazeSolver.hasSolution()) {
+                btn.setEnabled(false);
+                mazeCanvas.resetAnimation();
+                startTimer();
+            } else {
+                JOptionPane.showMessageDialog(MazePanel.this,
+                        "There is no solution....",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
         return btn;
     }
@@ -69,10 +75,9 @@ public class MazePanel extends JPanel {
         int animationDelay = AppConfig.getRenderConfig().getAnimationDelayMs();
 
         solveAnimation = new Timer(animationDelay, e -> {
-            boolean hasNextMove = mazeCanvas.nextFrame();
             mazeCanvas.repaint();
 
-            if (!hasNextMove) {
+            if (!mazeCanvas.nextFrame()) {
                 stopTimer();
                 solveButton.setEnabled(true);
             }
