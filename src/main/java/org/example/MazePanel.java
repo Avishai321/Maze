@@ -35,7 +35,7 @@ public class MazePanel extends JPanel {
         controlPanel.setOpaque(false);
         controlPanel.setBorder(new EmptyBorder(10, 0, 30, 0));
 
-        backButton = createBackButton(); //todo make it a class field to control it from other methods
+        backButton = createBackButton();
         solveButton = createSolveButton();
 
         controlPanel.add(backButton);
