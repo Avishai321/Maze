@@ -54,7 +54,6 @@ public class MazeCanvas extends JPanel {
         RenderConfig config = AppConfig.getRenderConfig();
         Color wallColor = Color.decode(config.getWallCellColor());
 
-        // 1. Draw Maze Base
         for (int row = 0; row < mHeight; row++) {
             for (int col = 0; col < mWidth; col++) {
                 int rectX = startX + (col * cellSize);
@@ -65,7 +64,6 @@ public class MazeCanvas extends JPanel {
             }
         }
 
-        // 2. Draw Animation Path (Up to currentFrameIndex)
         if (mazeSolver.hasSolution()) {
             List<Index> pathIndexes = mazeSolver.getPathIndexes();
             int framesToDraw = Math.min(currentFrameIndex, pathIndexes.size());
@@ -79,7 +77,6 @@ public class MazeCanvas extends JPanel {
             }
         }
 
-        // 3. Draw Grid Overlay
         if (config.isDrawGrid()) {
             g2d.setColor(Color.decode(config.getGridColor()));
             for (int row = 0; row <= mHeight; row++) {
