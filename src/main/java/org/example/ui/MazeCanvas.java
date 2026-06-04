@@ -53,13 +53,13 @@ public class MazeCanvas extends JPanel {
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        int mWidth = AppConfig.getMazeWidth();
-        int mHeight = AppConfig.getMazeHeight();
-
-        if (mWidth <= 0 || mHeight <= 0 || mazeMap == null) {
+        if (mazeMap == null || mazeMap.length == 0) {
             g2d.dispose();
             return;
         }
+
+        int mHeight = mazeMap.length;
+        int mWidth = mazeMap[0].length;
 
         int PADDING = 10;
         int panelWidth = getWidth() - (PADDING * 2);
