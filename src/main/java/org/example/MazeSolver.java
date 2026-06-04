@@ -2,12 +2,17 @@ package org.example;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+//TODO split this class to multiple files
+//  MazeRepository, for http and downloading
+//  MazeImageProcessor, converts the BufferedImage to boolean[][]
+//  MazeSolver, takes the boolean[][] and returns List<Index>
 public class MazeSolver {
     private int mazeWidth;
     private int mazeHeight;
@@ -19,7 +24,7 @@ public class MazeSolver {
     private boolean[][] path;
 
     private boolean solutionFound;
-    private List<Index> pathIndexes;
+    private List<Coordinate> pathIndexes; //todo change "Index" to "Coordinate"
 
     public void initialize() {
         this.renderConfig = AppConfig.getRenderConfig();
@@ -30,6 +35,8 @@ public class MazeSolver {
         processImage();
         findPath();
     }
+
+    public record Coordinate(int x, int y) {}
 
     private void fetchImage() {
         String url = AppConfig.BASE_IMAGE_URL + "?width=" + mazeWidth + "&height=" + mazeHeight;
@@ -78,7 +85,7 @@ public class MazeSolver {
 
         if (row == mazeMap.length - 1 && col == mazeMap[0].length - 1) {
             path[row][col] = true;
-            pathIndexes.add(new Index(col, row));
+            pathIndexes.add(new Coordinate(col, row));
             return true;
         }
 
@@ -88,7 +95,7 @@ public class MazeSolver {
                 pathFinderHelper(row - 1, col, visited)) {
 
             path[row][col] = true;
-            pathIndexes.add(new Index(col, row));
+            pathIndexes.add(new Coordinate(col, row));
             return true;
         }
 
@@ -107,7 +114,7 @@ public class MazeSolver {
         return path != null && solutionFound;
     }
 
-    public List<Index> getPathIndexes() {
+    public List<Coordinate> getPathIndexes() {
         return pathIndexes;
     }
 }

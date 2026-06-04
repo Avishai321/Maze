@@ -77,14 +77,14 @@ public class MazeCanvas extends JPanel {
         }
 
         if (mazeSolver.hasSolution()) {
-            List<Index> pathIndexes = mazeSolver.getPathIndexes();
+            List<MazeSolver.Coordinate> pathIndexes = mazeSolver.getPathIndexes();
             int framesToDraw = Math.min(currentFrameIndex, pathIndexes.size());
 
             g2d.setColor(cachedPathColor);
             for (int i = 0; i < framesToDraw; i++) {
-                Index point = pathIndexes.get(i);
-                int x = startX + (point.x * cellSize);
-                int y = startY + (point.y * cellSize);
+                MazeSolver.Coordinate coordinate = pathIndexes.get(i);
+                int x = startX + (coordinate.x() * cellSize);
+                int y = startY + (coordinate.y() * cellSize);
                 g2d.fillRect(x, y, cellSize, cellSize);
             }
         }
