@@ -54,7 +54,7 @@ public class MazePanel extends JPanel {
     private JButton createBackButton() {
         JButton btn = new StyledButton("Back", false);
         btn.addActionListener(e -> {
-            stopTimer();
+            if (solveAnimation != null && solveAnimation.isRunning()) solveAnimation.stop();
             Main.changeScene(Main.SETTINGS_PANEL);
         });
         return btn;
@@ -77,23 +77,25 @@ public class MazePanel extends JPanel {
         return btn;
     }
 
-    private void stopTimer() {
-        if (solveAnimation != null && solveAnimation.isRunning()) solveAnimation.stop();
-    }
+    private void setupTimer() {
+        if (solveAnimation != null) return;
 
-    private void startTimer() {
-        stopTimer();
-        int animationDelay = AppConfig.getRenderConfig().getAnimationDelayMs();
-
-        solveAnimation = new Timer(animationDelay, e -> {
+        solveAnimation = new Timer(0, e -> {
             mazeCanvas.repaint();
-
             if (!mazeCanvas.nextFrame()) {
-                stopTimer();
+                solveAnimation.stop();
                 solveButton.setEnabled(true);
             }
         });
-        solveAnimation.start();
+    }
+
+    private void startTimer() {
+        setupTimer();
+
+        int animationDelay = AppConfig.getRenderConfig().getAnimationDelayMs();
+        solveAnimation.setDelay(animationDelay);
+
+        solveAnimation.restart();
     }
 
     public void initialize() {
