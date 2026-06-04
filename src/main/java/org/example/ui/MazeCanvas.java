@@ -3,6 +3,7 @@ package org.example.ui;
 import org.example.algorithm.Coordinate;
 import org.example.config.AppConfig;
 import org.example.config.RenderConfig;
+import org.example.util.ColorUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,9 +16,9 @@ public class MazeCanvas extends JPanel {
     private List<Coordinate> pathIndexes;
     private int currentFrameIndex = 0;
 
-    private Color cachedWallColor;
-    private Color cachedPathColor;
-    private Color cachedGridColor;
+    private Color wallColor;
+    private Color gridColor;
+    private Color[] pathColors;
 
     private BufferedImage backgroundLayer;
     private BufferedImage gridLayerOverlay;
@@ -31,9 +32,20 @@ public class MazeCanvas extends JPanel {
         this.pathIndexes = path;
 
         RenderConfig config = AppConfig.getRenderConfig();
-        cachedWallColor = Color.decode(config.getWallCellColor());
-        cachedPathColor = Color.decode(config.getPathColor());
-        cachedGridColor = Color.decode(config.getGridColor());
+
+        wallColor = Color.decode(config.getWallCellColor());
+        gridColor = Color.decode(config.getGridColor());
+        Color pathColor = Color.decode(config.getPathColor());
+        Color startPathColor = ColorUtils.getInvertedColor(pathColor);
+
+        if (pathIndexes != null && !pathIndexes.isEmpty()) {
+            pathColors = new Color[pathIndexes.size()];
+            int stepsDenominator = Math.max(1, pathIndexes.size() - 1);
+
+            for (int i = 0; i < pathIndexes.size(); i++) {
+                pathColors[i] = ColorUtils.getIntermediateColor(startPathColor, pathColor, i, stepsDenominator);
+            }
+        }
 
         backgroundLayer = null;
         gridLayerOverlay = null;
@@ -87,13 +99,13 @@ public class MazeCanvas extends JPanel {
                 int rectX = startX + (col * cellSize);
                 int rectY = startY + (row * cellSize);
 
-                gWall.setColor(mazeMap[row][col] ? Color.WHITE : cachedWallColor);
+                gWall.setColor(mazeMap[row][col] ? Color.WHITE : wallColor);
                 gWall.fillRect(rectX, rectY, cellSize, cellSize);
             }
         }
 
         if (config.isDrawGrid()) {
-            gGrid.setColor(cachedGridColor);
+            gGrid.setColor(gridColor);
             for (int row = 0; row <= mHeight; row++) {
                 int y = startY + (row * cellSize);
                 gGrid.drawLine(startX, y, startX + totalMazePixelWidth, y);
@@ -139,15 +151,12 @@ public class MazeCanvas extends JPanel {
             int startY = (getHeight() - totalMazePixelHeight) / 2;
 
             int framesToDraw = Math.min(currentFrameIndex, pathIndexes.size());
-            g2d.setColor(cachedPathColor);
-
-            Color startColor = Color.RED;
-            Color endColor = cachedPathColor;
-
             for (int i = 0; i < framesToDraw; i++) {
                 Coordinate point = pathIndexes.get(i);
                 int x = startX + (point.x() * cellSize);
                 int y = startY + (point.y() * cellSize);
+
+                g2d.setColor(pathColors[i]);
                 g2d.fillRect(x, y, cellSize, cellSize);
             }
             g2d.dispose();
