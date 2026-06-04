@@ -253,6 +253,8 @@ public class SettingsPanel extends JPanel {
         try {
             spinner.commitEdit();
             int val = (Integer) spinner.getValue();
+
+            //todo according to the instructions, an invalid value should return AppConfig.DEFAULT_MAZE_WIDTH
             return Math.clamp(val, AppConfig.MIN_MAZE_WIDTH, AppConfig.MAX_MAZE_WIDTH);
         } catch (ParseException e) {
             return AppConfig.DEFAULT_MAZE_WIDTH;

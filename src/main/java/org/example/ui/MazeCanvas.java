@@ -141,6 +141,9 @@ public class MazeCanvas extends JPanel {
             int framesToDraw = Math.min(currentFrameIndex, pathIndexes.size());
             g2d.setColor(cachedPathColor);
 
+            Color startColor = Color.RED;
+            Color endColor = cachedPathColor;
+
             for (int i = 0; i < framesToDraw; i++) {
                 Coordinate point = pathIndexes.get(i);
                 int x = startX + (point.x() * cellSize);
