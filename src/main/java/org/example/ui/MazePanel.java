@@ -18,9 +18,10 @@ import java.util.logging.Logger;
 public class MazePanel extends JPanel {
     private MazeCanvas mazeCanvas;
     private JButton solveButton;
-    private JButton backButton;
     private JLabel statusLabel; // New Label
+
     private Timer solveAnimation;
+    private SwingWorker<Void, Void> worker;
 
     private boolean[][] currentMazeMap;
     private List<Coordinate> currentPath;
@@ -43,7 +44,7 @@ public class MazePanel extends JPanel {
         controlPanel.setOpaque(false);
         controlPanel.setBorder(new EmptyBorder(0, 10, 10, 10));
 
-        backButton = createBackButton();
+        JButton backButton = createBackButton();
         solveButton = createSolveButton();
 
         controlPanel.add(backButton);
@@ -62,6 +63,7 @@ public class MazePanel extends JPanel {
         JButton btn = new StyledButton("Back", false);
         btn.addActionListener(e -> {
             if (solveAnimation != null && solveAnimation.isRunning()) solveAnimation.stop();
+            if (worker != null && !worker.isDone()) worker.cancel(true);
             Main.changeScene(Main.SETTINGS_PANEL);
         });
         return btn;
@@ -102,12 +104,11 @@ public class MazePanel extends JPanel {
 
     public void initialize() {
         solveButton.setEnabled(false);
-        backButton.setEnabled(false);
         statusLabel.setText(" ");
         mazeCanvas.setMazeData(null, null);
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+        worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() throws Exception {
                 MazeRepository repo = new MazeRepository();
@@ -124,9 +125,8 @@ public class MazePanel extends JPanel {
 
             @Override
             protected void done() {
+                if (isCancelled()) return;
                 setCursor(Cursor.getDefaultCursor());
-                backButton.setEnabled(true);
-
                 try {
                     get();
                     mazeCanvas.setMazeData(currentMazeMap, currentPath);
