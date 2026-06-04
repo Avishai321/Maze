@@ -61,11 +61,7 @@ public class MazeCanvas extends JPanel {
         int mHeight = mazeMap.length;
         int mWidth = mazeMap[0].length;
 
-        int PADDING = 10;
-        int panelWidth = getWidth() - (PADDING * 2);
-        int panelHeight = getHeight() - (PADDING * 2);
-
-        int cellSize = Math.min(panelWidth / mWidth, panelHeight / mHeight);
+        int cellSize = Math.min(getWidth() / mWidth, getHeight() / mHeight);
         int totalMazePixelWidth = mWidth * cellSize;
         int totalMazePixelHeight = mHeight * cellSize;
 

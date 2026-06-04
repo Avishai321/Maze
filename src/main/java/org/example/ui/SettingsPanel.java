@@ -38,7 +38,7 @@ public class SettingsPanel extends JPanel {
     public SettingsPanel() {
         setPreferredSize(AppConfig.BOARD_SIZE);
         setBackground(COLOR_BACKGROUND);
-        setLayout(new GridBagLayout());
+        setLayout(new BorderLayout());
 
         initializeUI();
         refetchConfigs();
@@ -56,7 +56,7 @@ public class SettingsPanel extends JPanel {
                         FONT_TITLE,
                         Color.WHITE
                 ),
-                new EmptyBorder(20, 30, 30, 30)
+                new EmptyBorder(10, 10, 10, 10)
         ));
 
         JPanel contentSplitter = new JPanel(new GridLayout(1, 2, 40, 0));
@@ -64,16 +64,21 @@ public class SettingsPanel extends JPanel {
 
         contentSplitter.add(createServerColumn());
         contentSplitter.add(createLocalColumn());
-
         unifiedGroup.add(contentSplitter, BorderLayout.CENTER);
-        unifiedGroup.add(createActionButtons(), BorderLayout.SOUTH);
+
+        JPanel centerWrapper = new JPanel(new GridBagLayout());
+        centerWrapper.setOpaque(false);
 
         GridBagConstraints mainConstraints = new GridBagConstraints();
         mainConstraints.fill = GridBagConstraints.BOTH;
         mainConstraints.weightx = 1.0;
         mainConstraints.weighty = 1.0;
         mainConstraints.insets = new Insets(40, 40, 40, 40);
-        add(unifiedGroup, mainConstraints);
+
+        centerWrapper.add(unifiedGroup, mainConstraints);
+        add(centerWrapper, BorderLayout.CENTER);
+
+        add(createActionButtons(), BorderLayout.SOUTH);
     }
 
     private JPanel createServerColumn() {
@@ -93,46 +98,38 @@ public class SettingsPanel extends JPanel {
         cVal.insets = new Insets(15, 0, 15, 10);
 
         // --- Row 0: Wall Cell Color ---
-        cKey.gridy = 0;
-        cVal.gridy = 0;
+        cKey.gridy = 0; cVal.gridy = 0;
         panel.add(createKeyLabel("Wall Cell Color:"), cKey);
         wallCellColorValue = createValueLabel();
         panel.add(wallCellColorValue, cVal);
 
         // --- Row 1: Path Color ---
-        cKey.gridy = 1;
-        cVal.gridy = 1;
+        cKey.gridy = 1; cVal.gridy = 1;
         panel.add(createKeyLabel("Path Color:"), cKey);
         pathColorValue = createValueLabel();
         panel.add(pathColorValue, cVal);
 
         // --- Row 2: Draw Grid ---
-        cKey.gridy = 2;
-        cVal.gridy = 2;
+        cKey.gridy = 2; cVal.gridy = 2;
         panel.add(createKeyLabel("Draw Grid:"), cKey);
         drawGridValue = createValueLabel();
         panel.add(drawGridValue, cVal);
 
         // --- Row 3: Grid Color ---
-        cKey.gridy = 3;
-        cVal.gridy = 3;
+        cKey.gridy = 3; cVal.gridy = 3;
         panel.add(createKeyLabel("Grid Color:"), cKey);
         gridColorValue = createValueLabel();
         panel.add(gridColorValue, cVal);
 
         // --- Row 4: Animation Delay ---
-        cKey.gridy = 4;
-        cVal.gridy = 4;
+        cKey.gridy = 4; cVal.gridy = 4;
         panel.add(createKeyLabel("Animation Delay:"), cKey);
         animationDelayValue = createValueLabel();
         panel.add(animationDelayValue, cVal);
 
-        // Filler to push rows to the top
         GridBagConstraints fillerC = new GridBagConstraints();
-        fillerC.gridx = 0;
-        fillerC.gridy = 5;
-        fillerC.gridwidth = 2;
-        fillerC.weighty = 1.0;
+        fillerC.gridx = 0; fillerC.gridy = 5;
+        fillerC.gridwidth = 2; fillerC.weighty = 1.0;
         panel.add(Box.createVerticalGlue(), fillerC);
 
         return panel;
@@ -153,34 +150,30 @@ public class SettingsPanel extends JPanel {
         cSpinner.insets = new Insets(15, 10, 15, 10);
 
         // --- Row 0: Width ---
-        cLabel.gridy = 0;
-        cSpinner.gridy = 0;
+        cLabel.gridy = 0; cSpinner.gridy = 0;
         panel.add(createKeyLabel("Maze Width:"), cLabel);
         widthSpinner = createFlexibleSpinner();
         panel.add(widthSpinner, cSpinner);
 
         // --- Row 1: Height ---
-        cLabel.gridy = 1;
-        cSpinner.gridy = 1;
+        cLabel.gridy = 1; cSpinner.gridy = 1;
         panel.add(createKeyLabel("Maze Height:"), cLabel);
         heightSpinner = createFlexibleSpinner();
         panel.add(heightSpinner, cSpinner);
 
-        // Filler to push rows to the top
         GridBagConstraints fillerC = new GridBagConstraints();
-        fillerC.gridx = 0;
-        fillerC.gridy = 2;
-        fillerC.gridwidth = 2;
-        fillerC.weighty = 1.0;
+        fillerC.gridx = 0; fillerC.gridy = 2;
+        fillerC.gridwidth = 2; fillerC.weighty = 1.0;
         panel.add(Box.createVerticalGlue(), fillerC);
 
         return panel;
     }
 
     private JPanel createActionButtons() {
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 0));
+        // FIX 4: Exactly match the spacing and borders of MazePanel's button container
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 10));
         buttonPanel.setOpaque(false);
-        buttonPanel.setBorder(new EmptyBorder(30, 0, 0, 0));
+        buttonPanel.setBorder(new EmptyBorder(0, 10, 10, 10));
 
         refreshButton = new StyledButton("Refresh Config", false);
         refreshButton.addActionListener(e -> refetchConfigs());

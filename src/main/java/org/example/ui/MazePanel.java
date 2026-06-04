@@ -41,7 +41,7 @@ public class MazePanel extends JPanel {
 
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 10));
         controlPanel.setOpaque(false);
-        controlPanel.setBorder(new EmptyBorder(10, 0, 30, 0));
+        controlPanel.setBorder(new EmptyBorder(0, 10, 10, 10));
 
         backButton = createBackButton();
         solveButton = createSolveButton();
