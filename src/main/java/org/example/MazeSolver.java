@@ -20,7 +20,7 @@ public class MazeSolver {
     private boolean[][] path;
 
     private boolean solutionFound;
-    private List<Point> pathIndexes;
+    private List<Index> pathIndexes;
 
     public void initialize() {
         this.renderConfig = AppConfig.getRenderConfig();
@@ -88,7 +88,7 @@ public class MazeSolver {
 
         if (row == mazeMap.length - 1 && col == mazeMap[0].length - 1) {
             path[row][col] = true;
-            pathIndexes.add(new Point(col, row));
+            pathIndexes.add(new Index(col, row));
             return true;
         }
 
@@ -98,7 +98,7 @@ public class MazeSolver {
                 pathFinderHelper(row - 1, col, visited)) {
 
             path[row][col] = true;
-            pathIndexes.add(new Point(col, row));
+            pathIndexes.add(new Index(col, row));
             return true;
         }
 
@@ -117,7 +117,7 @@ public class MazeSolver {
         return path != null && solutionFound;
     }
 
-    public List<Point> getPathIndexes() {
+    public List<Index> getPathIndexes() {
         return pathIndexes;
     }
 }
