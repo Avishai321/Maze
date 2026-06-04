@@ -1,4 +1,8 @@
-package org.example;
+package org.example.ui;
+
+import org.example.config.AppConfig;
+import org.example.config.RenderConfig;
+import org.example.network.ConfigService;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -7,7 +11,7 @@ import javax.swing.text.DefaultFormatter;
 import java.awt.*;
 import java.text.ParseException;
 
-import static org.example.AppConfig.COLOR_BACKGROUND;
+import static org.example.config.AppConfig.COLOR_BACKGROUND;
 
 public class SettingsPanel extends JPanel {
     private JLabel wallCellColorValue;

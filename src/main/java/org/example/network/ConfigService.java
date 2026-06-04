@@ -1,6 +1,8 @@
-package org.example;
+package org.example.network;
 
 import com.google.gson.Gson;
+import org.example.config.AppConfig;
+import org.example.config.RenderConfig;
 
 import java.net.URI;
 import java.net.http.HttpClient;

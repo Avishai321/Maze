@@ -1,25 +1,32 @@
-package org.example;
+package org.example.ui;
+
+import org.example.algorithm.BreadthFirstPathfinder;
+import org.example.algorithm.Coordinate;
+import org.example.config.AppConfig;
+import org.example.image.MazeImageProcessor;
+import org.example.network.MazeRepository;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MazePanel extends JPanel {
-    private final MazeSolver mazeSolver;
     private MazeCanvas mazeCanvas;
-
     private JButton solveButton;
     private JButton backButton;
     private Timer solveAnimation;
 
+    private boolean[][] currentMazeMap;
+    private List<Coordinate> currentPath;
+
     private final Logger logger = Logger.getLogger(MazePanel.class.getName());
 
     public MazePanel() {
-        mazeSolver = new MazeSolver();
-
         setPreferredSize(AppConfig.BOARD_SIZE);
         setBackground(AppConfig.COLOR_BACKGROUND);
         setLayout(new BorderLayout());
@@ -28,7 +35,7 @@ public class MazePanel extends JPanel {
     }
 
     private void initializeUI() {
-        mazeCanvas = new MazeCanvas(mazeSolver);
+        mazeCanvas = new MazeCanvas();
         add(mazeCanvas, BorderLayout.CENTER);
 
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 10));
@@ -57,17 +64,21 @@ public class MazePanel extends JPanel {
         JButton btn = new StyledButton("Check Solution", true);
         btn.setEnabled(false);
         btn.addActionListener(e -> {
-            if (mazeSolver.hasSolution()) {
+            if (currentPath != null && !currentPath.isEmpty()) {
                 btn.setEnabled(false);
                 mazeCanvas.resetAnimation();
                 startTimer();
             } else {
                 JOptionPane.showMessageDialog(MazePanel.this,
-                        "There is no solution....",
+                        "There is no solution to this maze.",
                         "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
         return btn;
+    }
+
+    private void stopTimer() {
+        if (solveAnimation != null && solveAnimation.isRunning()) solveAnimation.stop();
     }
 
     private void startTimer() {
@@ -85,10 +96,6 @@ public class MazePanel extends JPanel {
         solveAnimation.start();
     }
 
-    private void stopTimer() {
-        if (solveAnimation != null && solveAnimation.isRunning()) solveAnimation.stop();
-    }
-
     public void initialize() {
         solveButton.setEnabled(false);
         backButton.setEnabled(false);
@@ -96,8 +103,16 @@ public class MazePanel extends JPanel {
 
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override
-            protected Void doInBackground() {
-                mazeSolver.initialize();
+            protected Void doInBackground() throws Exception {
+                MazeRepository repo = new MazeRepository();
+                BufferedImage img = repo.fetchMazeImage(AppConfig.getMazeWidth(), AppConfig.getMazeHeight());
+
+                MazeImageProcessor processor = new MazeImageProcessor();
+                currentMazeMap = processor.extractMazeGrid(img, AppConfig.getMazeWidth(), AppConfig.getMazeHeight());
+
+                BreadthFirstPathfinder pathfinder = new BreadthFirstPathfinder();
+                currentPath = pathfinder.findPath(currentMazeMap);
+
                 return null;
             }
 
@@ -108,22 +123,19 @@ public class MazePanel extends JPanel {
 
                 try {
                     get();
+
+                    mazeCanvas.setMazeData(currentMazeMap, currentPath);
                     solveButton.setEnabled(true);
-                    mazeCanvas.resetAnimation();
-                    mazeCanvas.repaint();
+
                 } catch (InterruptedException e) {
-                    logger.log(Level.WARNING, "Maze background worker was interrupted", e);
+                    logger.log(Level.WARNING, "Worker interrupted", e);
                     Thread.currentThread().interrupt();
-                    JOptionPane.showMessageDialog(MazePanel.this,
-                            "The operation was interrupted.",
-                            "Error", JOptionPane.ERROR_MESSAGE);
                 } catch (ExecutionException e) {
-                    logger.log(Level.SEVERE, "Failed to initialize or solve the maze", e.getCause());
+                    logger.log(Level.SEVERE, "Failed pipeline", e.getCause());
                     JOptionPane.showMessageDialog(MazePanel.this,
-                            "Failed to load and solve maze: " + e.getCause().getMessage(),
+                            "Failed to load maze: " + e.getCause().getMessage(),
                             "Error", JOptionPane.ERROR_MESSAGE);
                 }
-
             }
         };
         worker.execute();

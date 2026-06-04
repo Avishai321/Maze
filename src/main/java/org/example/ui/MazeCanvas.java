@@ -1,29 +1,38 @@
-package org.example;
+package org.example.ui;
+
+import org.example.algorithm.Coordinate;
+import org.example.config.AppConfig;
+import org.example.config.RenderConfig;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
 public class MazeCanvas extends JPanel {
-    private final MazeSolver mazeSolver;
+
+    private boolean[][] mazeMap;
+    private List<Coordinate> pathIndexes;
+    private int currentFrameIndex = 0;
 
     private Color cachedWallColor;
     private Color cachedPathColor;
     private Color cachedGridColor;
 
-    private int currentFrameIndex = 0;
-
-    public MazeCanvas(MazeSolver mazeSolver) {
-        this.mazeSolver = mazeSolver;
+    public MazeCanvas() {
         setOpaque(false);
-        cacheColors();
     }
 
-    public void cacheColors() {
+    public void setMazeData(boolean[][] map, List<Coordinate> path) {
+        this.mazeMap = map;
+        this.pathIndexes = path;
+
         RenderConfig config = AppConfig.getRenderConfig();
         cachedWallColor = Color.decode(config.getWallCellColor());
         cachedPathColor = Color.decode(config.getPathColor());
         cachedGridColor = Color.decode(config.getGridColor());
+
+        resetAnimation();
+        repaint();
     }
 
     public void resetAnimation() {
@@ -31,7 +40,7 @@ public class MazeCanvas extends JPanel {
     }
 
     public boolean nextFrame() {
-        if (mazeSolver.hasSolution() && currentFrameIndex < mazeSolver.getPathIndexes().size()) {
+        if (pathIndexes != null && currentFrameIndex < pathIndexes.size()) {
             currentFrameIndex++;
             return true;
         }
@@ -47,7 +56,7 @@ public class MazeCanvas extends JPanel {
         int mWidth = AppConfig.getMazeWidth();
         int mHeight = AppConfig.getMazeHeight();
 
-        if (mWidth <= 0 || mHeight <= 0 || mazeSolver.mazeMap == null) {
+        if (mWidth <= 0 || mHeight <= 0 || mazeMap == null) {
             g2d.dispose();
             return;
         }
@@ -64,27 +73,25 @@ public class MazeCanvas extends JPanel {
         int startY = (getHeight() - totalMazePixelHeight) / 2;
 
         RenderConfig config = AppConfig.getRenderConfig();
-        Color wallColor = cachedWallColor;
 
         for (int row = 0; row < mHeight; row++) {
             for (int col = 0; col < mWidth; col++) {
                 int rectX = startX + (col * cellSize);
                 int rectY = startY + (row * cellSize);
 
-                g2d.setColor(mazeSolver.mazeMap[row][col] ? Color.WHITE : wallColor);
+                g2d.setColor(mazeMap[row][col] ? Color.WHITE : cachedWallColor);
                 g2d.fillRect(rectX, rectY, cellSize, cellSize);
             }
         }
 
-        if (mazeSolver.hasSolution()) {
-            List<MazeSolver.Coordinate> pathIndexes = mazeSolver.getPathIndexes();
+        if (pathIndexes != null && !pathIndexes.isEmpty()) {
             int framesToDraw = Math.min(currentFrameIndex, pathIndexes.size());
-
             g2d.setColor(cachedPathColor);
+
             for (int i = 0; i < framesToDraw; i++) {
-                MazeSolver.Coordinate coordinate = pathIndexes.get(i);
-                int x = startX + (coordinate.x() * cellSize);
-                int y = startY + (coordinate.y() * cellSize);
+                Coordinate point = pathIndexes.get(i);
+                int x = startX + (point.x() * cellSize);
+                int y = startY + (point.y() * cellSize);
                 g2d.fillRect(x, y, cellSize, cellSize);
             }
         }
