@@ -19,7 +19,8 @@ public class MazeCanvas extends JPanel {
     private Color cachedPathColor;
     private Color cachedGridColor;
 
-    private BufferedImage staticBackground;
+    private BufferedImage backgroundLayer;
+    private BufferedImage gridLayerOverlay;
 
     public MazeCanvas() {
         setOpaque(false);
@@ -33,7 +34,9 @@ public class MazeCanvas extends JPanel {
         cachedWallColor = Color.decode(config.getWallCellColor());
         cachedPathColor = Color.decode(config.getPathColor());
         cachedGridColor = Color.decode(config.getGridColor());
-        staticBackground = null;
+
+        backgroundLayer = null;
+        gridLayerOverlay = null;
 
         resetAnimation();
         repaint();
@@ -57,9 +60,15 @@ public class MazeCanvas extends JPanel {
 
         if (width <= 0 || height <= 0 || mazeMap == null) return;
 
-        staticBackground = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = staticBackground.createGraphics();
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        // Initialize both layers with transparency support
+        backgroundLayer = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        gridLayerOverlay = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        Graphics2D gWall = backgroundLayer.createGraphics();
+        Graphics2D gGrid = gridLayerOverlay.createGraphics();
+
+        gWall.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        gGrid.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         int mHeight = mazeMap.length;
         int mWidth = mazeMap[0].length;
@@ -71,22 +80,37 @@ public class MazeCanvas extends JPanel {
         int startX = (width - totalMazePixelWidth) / 2;
         int startY = (height - totalMazePixelHeight) / 2;
 
+        RenderConfig config = AppConfig.getRenderConfig();
+
         for (int row = 0; row < mHeight; row++) {
             for (int col = 0; col < mWidth; col++) {
                 int rectX = startX + (col * cellSize);
                 int rectY = startY + (row * cellSize);
 
-                g2d.setColor(mazeMap[row][col] ? Color.WHITE : cachedWallColor);
-                g2d.fillRect(rectX, rectY, cellSize, cellSize);
+                gWall.setColor(mazeMap[row][col] ? Color.WHITE : cachedWallColor);
+                gWall.fillRect(rectX, rectY, cellSize, cellSize);
             }
         }
 
-        g2d.dispose();
+        if (config.isDrawGrid()) {
+            gGrid.setColor(cachedGridColor);
+            for (int row = 0; row <= mHeight; row++) {
+                int y = startY + (row * cellSize);
+                gGrid.drawLine(startX, y, startX + totalMazePixelWidth, y);
+            }
+            for (int col = 0; col <= mWidth; col++) {
+                int x = startX + (col * cellSize);
+                gGrid.drawLine(x, startY, x, startY + totalMazePixelHeight);
+            }
+        }
+
+        gWall.dispose();
+        gGrid.dispose();
     }
 
     private boolean shouldPaintBackground() {
-        if (staticBackground == null) return true;
-        return (staticBackground.getWidth() != getWidth() || staticBackground.getHeight() != getHeight());
+        if (backgroundLayer == null || gridLayerOverlay == null) return true;
+        return (backgroundLayer.getWidth() != getWidth() || backgroundLayer.getHeight() != getHeight());
     }
 
     @Override
@@ -96,10 +120,12 @@ public class MazeCanvas extends JPanel {
         super.paintComponent(g);
 
         if (mazeMap == null || mazeMap.length == 0) return;
-
         if (shouldPaintBackground()) preRenderBackground();
-        if (staticBackground != null) g.drawImage(staticBackground, 0, 0, null);
 
+        // layer 1: maze background
+        if (backgroundLayer != null) g.drawImage(backgroundLayer, 0, 0, null);
+
+        // layer 2: animated solution path
         if (pathIndexes != null && !pathIndexes.isEmpty()) {
             Graphics2D g2d = (Graphics2D) g.create();
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -121,25 +147,11 @@ public class MazeCanvas extends JPanel {
                 int y = startY + (point.y() * cellSize);
                 g2d.fillRect(x, y, cellSize, cellSize);
             }
-
-            // drawing the grid in preRenderBackground() will significantly boost render time.
-            // the problem is that the path is overriding the grid.
-            // in a 100x100 maze, where the grid is being painted once, the render time is around 1ms.
-            // when I paint the grid here, the render time goes up to around 40ms (!!!!)
-            if (AppConfig.getRenderConfig().isDrawGrid()) {
-                g2d.setColor(cachedGridColor);
-                for (int row = 0; row <= mHeight; row++) {
-                    int y = startY + (row * cellSize);
-                    g2d.drawLine(startX, y, startX + totalMazePixelWidth, y);
-                }
-                for (int col = 0; col <= mWidth; col++) {
-                    int x = startX + (col * cellSize);
-                    g2d.drawLine(x, startY, x, startY + totalMazePixelHeight);
-                }
-            }
-
             g2d.dispose();
         }
+
+        // layer 3: grid, this is drawn last, ensuring the grid always sits above the animated path
+        if (gridLayerOverlay != null) g.drawImage(gridLayerOverlay, 0, 0, null);
 
         long renderTimeNs = System.nanoTime() - startTime;
         double renderTimeMs = renderTimeNs / 1_000_000.0;
