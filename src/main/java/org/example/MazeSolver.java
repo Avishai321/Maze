@@ -81,7 +81,7 @@ public class MazeSolver {
     }
 
     private boolean pathFinderHelper(int row, int col, boolean[][] visited) {
-        if (row < 0 || row > mazeMap.length || col < 0 || col > mazeMap[0].length) return false;
+        if (row < 0 || row >= mazeMap.length || col < 0 || col >= mazeMap[0].length) return false;
         if (!mazeMap[row][col] || visited[row][col]) return false;
 
         visited[row][col] = true;
