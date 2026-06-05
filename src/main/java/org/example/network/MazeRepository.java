@@ -28,7 +28,9 @@ public class MazeRepository {
             throw new IOException("Failed to fetch image. HTTP status code: " + response.statusCode());
 
         try (InputStream inputStream = response.body()) {
-            return ImageIO.read(inputStream);
+            BufferedImage img = ImageIO.read(inputStream);
+            if (img == null) throw new IOException("Server returned invalid image format or empty body");
+            return img;
         }
     }
 }
