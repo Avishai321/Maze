@@ -278,8 +278,10 @@ public class SettingsPanel extends JPanel {
             @Override
             public void onSuccess(RenderConfig config) {
                 AppConfig.setRenderConfig(config);
-                setActionButtonsEnable(true);
-                SwingUtilities.invokeLater(() -> updateUIWithData(config));
+                SwingUtilities.invokeLater(() -> {
+                    setActionButtonsEnable(true);
+                    updateUIWithData(config);
+                });
             }
 
             @Override
