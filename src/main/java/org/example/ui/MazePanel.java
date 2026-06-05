@@ -18,15 +18,17 @@ import java.util.logging.Logger;
 public class MazePanel extends JPanel {
     private MazeCanvas mazeCanvas;
     private JButton solveButton;
-    private JLabel statusLabel; // New Label
+    private JLabel statusLabel;
 
     private Timer solveAnimation;
-    private SwingWorker<Void, Void> worker;
+    private SwingWorker<MazeResult, Void> worker;
 
     private boolean[][] currentMazeMap;
     private List<Coordinate> currentPath;
 
     private final Logger logger = Logger.getLogger(MazePanel.class.getName());
+
+    private record MazeResult(boolean[][] map, List<Coordinate> path) {}
 
     public MazePanel() {
         setPreferredSize(AppConfig.BOARD_SIZE);
@@ -78,7 +80,9 @@ public class MazePanel extends JPanel {
                 btn.setEnabled(false);
                 mazeCanvas.resetAnimation();
                 startTimer();
-            } else statusLabel.setText("No path exists for this maze.");
+            } else {
+                statusLabel.setText("No path exists for this maze.");
+            }
         });
         return btn;
     }
@@ -110,17 +114,20 @@ public class MazePanel extends JPanel {
 
         worker = new SwingWorker<>() {
             @Override
-            protected Void doInBackground() throws Exception {
+            protected MazeResult doInBackground() throws Exception {
+                int mazeWidth = AppConfig.getMazeWidth();
+                int mazeHeight = AppConfig.getMazeHeight();
+
                 MazeRepository repo = new MazeRepository();
-                BufferedImage img = repo.fetchMazeImage(AppConfig.getMazeWidth(), AppConfig.getMazeHeight());
+                BufferedImage img = repo.fetchMazeImage(mazeWidth, mazeHeight);
 
                 MazeImageProcessor processor = new MazeImageProcessor();
-                currentMazeMap = processor.extractMazeGrid(img, AppConfig.getMazeWidth(), AppConfig.getMazeHeight());
+                boolean[][] tempMap = processor.extractMazeGrid(img, mazeWidth, mazeHeight);
 
                 BreadthFirstPathfinder pathfinder = new BreadthFirstPathfinder();
-                currentPath = pathfinder.findPath(currentMazeMap);
+                List<Coordinate> tempPath = pathfinder.findPath(tempMap);
 
-                return null;
+                return new MazeResult(tempMap, tempPath);
             }
 
             @Override
@@ -128,7 +135,11 @@ public class MazePanel extends JPanel {
                 if (isCancelled()) return;
                 setCursor(Cursor.getDefaultCursor());
                 try {
-                    get();
+                    MazeResult result = get();
+
+                    currentMazeMap = result.map();
+                    currentPath = result.path();
+
                     mazeCanvas.setMazeData(currentMazeMap, currentPath);
                     solveButton.setEnabled(true);
 
