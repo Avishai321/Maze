@@ -3,7 +3,6 @@ package org.example.ui;
 import org.example.algorithm.Coordinate;
 import org.example.config.AppConfig;
 import org.example.config.RenderConfig;
-import org.example.util.ColorUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,7 +16,7 @@ public class MazeCanvas extends JPanel {
 
     private Color wallColor;
     private Color gridColor;
-    private Color[] pathColors;
+    private Color pathColor;
 
     private BufferedImage backgroundLayer;
     private BufferedImage gridLayerOverlay;
@@ -34,17 +33,7 @@ public class MazeCanvas extends JPanel {
 
         wallColor = Color.decode(config.getWallCellColor());
         gridColor = Color.decode(config.getGridColor());
-        Color pathColor = Color.decode(config.getPathColor());
-        Color startPathColor = ColorUtils.getInvertedColor(pathColor);
-
-        if (pathIndexes != null && !pathIndexes.isEmpty()) {
-            pathColors = new Color[pathIndexes.size()];
-            int stepsDenominator = Math.max(1, pathIndexes.size() - 1);
-
-            for (int i = 0; i < pathIndexes.size(); i++) {
-                pathColors[i] = ColorUtils.getIntermediateColor(startPathColor, pathColor, i, stepsDenominator);
-            }
-        }
+        pathColor = Color.decode(config.getPathColor());
 
         backgroundLayer = null;
         gridLayerOverlay = null;
@@ -152,13 +141,13 @@ public class MazeCanvas extends JPanel {
             int startX = (getWidth() - totalMazePixelWidth) / 2;
             int startY = (getHeight() - totalMazePixelHeight) / 2;
 
+            g2d.setColor(pathColor);
             int framesToDraw = Math.min(currentFrameIndex, pathIndexes.size());
             for (int i = 0; i < framesToDraw; i++) {
                 Coordinate point = pathIndexes.get(i);
                 int x = startX + (point.x() * cellSize);
                 int y = startY + (point.y() * cellSize);
 
-                g2d.setColor(pathColors[i]);
                 g2d.fillRect(x, y, cellSize, cellSize);
             }
             g2d.dispose();

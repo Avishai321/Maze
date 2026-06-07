@@ -39,7 +39,7 @@ public class SettingsPanel extends JPanel {
         setLayout(new BorderLayout());
 
         initializeUI();
-        refetchConfigs();
+        fetchConfigs();
     }
 
     private void initializeUI() {
@@ -174,7 +174,7 @@ public class SettingsPanel extends JPanel {
         buttonPanel.setBorder(new EmptyBorder(0, 10, 10, 10));
 
         refreshButton = new StyledButton("Refresh Config", false);
-        refreshButton.addActionListener(e -> refetchConfigs());
+        refreshButton.addActionListener(e -> fetchConfigs());
 
         getMazeButton = new StyledButton("Get Maze", true);
         getMazeButton.addActionListener(e -> {
@@ -252,8 +252,8 @@ public class SettingsPanel extends JPanel {
             spinner.commitEdit();
             int val = (Integer) spinner.getValue();
 
-            //todo according to the instructions, an invalid value should return AppConfig.DEFAULT_MAZE_WIDTH
-            return Math.clamp(val, AppConfig.MIN_MAZE_WIDTH, AppConfig.MAX_MAZE_WIDTH);
+            if (val > AppConfig.MAX_MAZE_WIDTH || val < AppConfig.MIN_MAZE_WIDTH) return AppConfig.DEFAULT_MAZE_WIDTH;
+            return val;
         } catch (ParseException e) {
             return AppConfig.DEFAULT_MAZE_WIDTH;
         }
@@ -270,7 +270,7 @@ public class SettingsPanel extends JPanel {
         }
     }
 
-    public void refetchConfigs() {
+    public void fetchConfigs() {
         setAllLabels("Loading...", COLOR_LOADING);
         setActionButtonsEnable(false);
 
