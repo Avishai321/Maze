@@ -11,7 +11,6 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 
 public class MazeCanvas extends JPanel {
-
     private boolean[][] mazeMap;
     private List<Coordinate> pathIndexes;
     private int currentFrameIndex = 0;
@@ -72,7 +71,10 @@ public class MazeCanvas extends JPanel {
 
         if (width <= 0 || height <= 0 || mazeMap == null) return;
 
-        // Initialize both layers with transparency support
+        if (backgroundLayer != null) backgroundLayer.flush();
+        if (gridLayerOverlay != null) gridLayerOverlay.flush();
+
+        // initialize both layers with transparency support
         backgroundLayer = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         gridLayerOverlay = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 

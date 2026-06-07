@@ -10,8 +10,6 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.text.ParseException;
 
-import static org.example.config.AppConfig.COLOR_BACKGROUND;
-
 public class SettingsPanel extends JPanel {
     private JLabel wallCellColorValue;
     private JLabel pathColorValue;
@@ -37,7 +35,7 @@ public class SettingsPanel extends JPanel {
 
     public SettingsPanel() {
         setPreferredSize(AppConfig.BOARD_SIZE);
-        setBackground(COLOR_BACKGROUND);
+        setBackground(AppConfig.COLOR_BACKGROUND);
         setLayout(new BorderLayout());
 
         initializeUI();
@@ -280,8 +278,10 @@ public class SettingsPanel extends JPanel {
             @Override
             public void onSuccess(RenderConfig config) {
                 AppConfig.setRenderConfig(config);
-                setActionButtonsEnable(true);
-                SwingUtilities.invokeLater(() -> updateUIWithData(config));
+                SwingUtilities.invokeLater(() -> {
+                    setActionButtonsEnable(true);
+                    updateUIWithData(config);
+                });
             }
 
             @Override
