@@ -31,7 +31,7 @@ public class MazePanel extends JPanel {
     private record MazeResult(boolean[][] map, List<Coordinate> path) {}
 
     public MazePanel() {
-        setPreferredSize(AppConfig.BOARD_SIZE);
+        setPreferredSize(AppConfig.WINDOW_SIZE);
         setBackground(AppConfig.COLOR_BACKGROUND);
         setLayout(new BorderLayout());
 

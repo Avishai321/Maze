@@ -17,8 +17,7 @@ public class Window {
         SwingUtilities.invokeLater(() -> {
             JFrame window = new JFrame(AppConfig.APP_TITLE);
             window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            window.setResizable(false);
-
+            window.setMinimumSize(AppConfig.WINDOW_MIN_SIZE);
             window.setBackground(AppConfig.COLOR_BACKGROUND);
 
             settingsPanel = new SettingsPanel();

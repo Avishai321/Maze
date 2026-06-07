@@ -4,7 +4,8 @@ import java.awt.*;
 
 public final class AppConfig {
     public static final String APP_TITLE = "Maze";
-    public static final Dimension BOARD_SIZE = new Dimension(750, 800);
+    public static final Dimension WINDOW_SIZE = new Dimension(700, 800);
+    public static final Dimension WINDOW_MIN_SIZE = new Dimension(600, 600);
 
     public static final String CONFIG_URL = "https://backend-qcf9.onrender.com/fm1/get-render-config";
     public static final String BASE_IMAGE_URL = "https://backend-qcf9.onrender.com/fm1/get-maze-image";

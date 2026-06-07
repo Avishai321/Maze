@@ -34,7 +34,7 @@ public class SettingsPanel extends JPanel {
     private static final Font FONT_VALUE = new Font("Segoe UI", Font.BOLD, 18);
 
     public SettingsPanel() {
-        setPreferredSize(AppConfig.BOARD_SIZE);
+        setPreferredSize(AppConfig.WINDOW_SIZE);
         setBackground(AppConfig.COLOR_BACKGROUND);
         setLayout(new BorderLayout());
 
@@ -57,7 +57,7 @@ public class SettingsPanel extends JPanel {
                 new EmptyBorder(10, 10, 10, 10)
         ));
 
-        JPanel contentSplitter = new JPanel(new GridLayout(1, 2, 40, 0));
+        JPanel contentSplitter = new JPanel(new GridLayout(1, 2, 0, 0));
         contentSplitter.setOpaque(false);
 
         contentSplitter.add(createServerColumn());
@@ -71,7 +71,7 @@ public class SettingsPanel extends JPanel {
         mainConstraints.fill = GridBagConstraints.BOTH;
         mainConstraints.weightx = 1.0;
         mainConstraints.weighty = 1.0;
-        mainConstraints.insets = new Insets(40, 40, 40, 40);
+        mainConstraints.insets = new Insets(20, 20, 20, 20);
 
         centerWrapper.add(unifiedGroup, mainConstraints);
         add(centerWrapper, BorderLayout.CENTER);
@@ -87,13 +87,13 @@ public class SettingsPanel extends JPanel {
         cKey.gridx = 0;
         cKey.anchor = GridBagConstraints.WEST;
         cKey.weightx = 1.0;
-        cKey.insets = new Insets(15, 10, 15, 0);
+        cKey.insets = new Insets(15, 5, 15, 0);
 
         GridBagConstraints cVal = new GridBagConstraints();
         cVal.gridx = 1;
         cVal.anchor = GridBagConstraints.EAST;
         cVal.weightx = 0.0;
-        cVal.insets = new Insets(15, 0, 15, 10);
+        cVal.insets = new Insets(15, 0, 15, 0);
 
         // --- Row 0: Wall Cell Color ---
         cKey.gridy = 0; cVal.gridy = 0;
@@ -139,13 +139,15 @@ public class SettingsPanel extends JPanel {
 
         GridBagConstraints cLabel = new GridBagConstraints();
         cLabel.gridx = 0;
-        cLabel.anchor = GridBagConstraints.EAST;
-        cLabel.insets = new Insets(15, 10, 15, 10);
+        cLabel.anchor = GridBagConstraints.WEST;
+        cLabel.weightx = 1.0;
+        cLabel.insets = new Insets(15, 40, 15, 0);
 
         GridBagConstraints cSpinner = new GridBagConstraints();
         cSpinner.gridx = 1;
-        cSpinner.anchor = GridBagConstraints.WEST;
-        cSpinner.insets = new Insets(15, 10, 15, 10);
+        cSpinner.anchor = GridBagConstraints.EAST;
+        cSpinner.weightx = 0.0;
+        cSpinner.insets = new Insets(15, 0, 15, 5);
 
         // --- Row 0: Width ---
         cLabel.gridy = 0; cSpinner.gridy = 0;
