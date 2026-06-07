@@ -64,7 +64,7 @@ public class MazePanel extends JPanel {
         btn.addActionListener(e -> {
             if (solveAnimation != null && solveAnimation.isRunning()) solveAnimation.stop();
             if (worker != null && !worker.isDone()) worker.cancel(true);
-            Main.changeScene(Main.SETTINGS_PANEL);
+            Window.changeScene(Window.SETTINGS_PANEL);
         });
         return btn;
     }

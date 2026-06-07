@@ -199,7 +199,7 @@ public class SettingsPanel extends JPanel {
             }
 
             AppConfig.setMazeDimensions(selectedWidth, selectedHeight);
-            Main.changeScene(Main.MAZE_PANEL);
+            Window.changeScene(Window.MAZE_PANEL);
         });
         getMazeButton.setEnabled(false);
 

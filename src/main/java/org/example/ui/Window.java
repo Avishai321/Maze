@@ -5,7 +5,7 @@ import org.example.config.AppConfig;
 import javax.swing.*;
 import java.awt.*;
 
-public class Main {
+public class Window {
     public static final String SETTINGS_PANEL = "SETTINGS_PANEL";
     public static final String MAZE_PANEL = "MAZE_PANEL";
 
@@ -13,7 +13,7 @@ public class Main {
     private static SettingsPanel settingsPanel;
     private static MazePanel mazePanel;
 
-    public static void main(String[] args) {
+    public void initialize() {
         SwingUtilities.invokeLater(() -> {
             JFrame window = new JFrame(AppConfig.APP_TITLE);
             window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
