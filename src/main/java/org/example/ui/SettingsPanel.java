@@ -170,7 +170,6 @@ public class SettingsPanel extends JPanel {
     }
 
     private JPanel createActionButtons() {
-        // FIX 4: Exactly match the spacing and borders of MazePanel's button container
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 10));
         buttonPanel.setOpaque(false);
         buttonPanel.setBorder(new EmptyBorder(0, 10, 10, 10));
@@ -276,7 +275,7 @@ public class SettingsPanel extends JPanel {
         setAllLabels("Loading...", COLOR_LOADING);
         setActionButtonsEnable(false);
 
-        ConfigService.fetchRenderConfig(new ConfigService.ConfigCallback() {
+        ConfigService.ConfigCallback configCallback = new ConfigService.ConfigCallback() {
             @Override
             public void onSuccess(RenderConfig config) {
                 AppConfig.setRenderConfig(config);
@@ -291,7 +290,9 @@ public class SettingsPanel extends JPanel {
                 refreshButton.setEnabled(true);
                 SwingUtilities.invokeLater(() -> setAllLabels("Connection Error", COLOR_ERROR));
             }
-        });
+        };
+
+        ConfigService.fetchRenderConfig(configCallback);
     }
 
     private void updateUIWithData(RenderConfig config) {

@@ -10,29 +10,30 @@ public class Window {
     public static final String MAZE_PANEL = "MAZE_PANEL";
 
     private static JPanel panels;
-    private static SettingsPanel settingsPanel;
     private static MazePanel mazePanel;
 
+    public Window() {
+        initialize();
+    }
+
     public void initialize() {
-        SwingUtilities.invokeLater(() -> {
-            JFrame window = new JFrame(AppConfig.APP_TITLE);
-            window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            window.setMinimumSize(AppConfig.WINDOW_MIN_SIZE);
-            window.setBackground(AppConfig.COLOR_BACKGROUND);
+        JFrame window = new JFrame(AppConfig.APP_TITLE);
+        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        window.setMinimumSize(AppConfig.WINDOW_MIN_SIZE);
+        window.setBackground(AppConfig.COLOR_BACKGROUND);
 
-            settingsPanel = new SettingsPanel();
-            mazePanel = new MazePanel();
+        SettingsPanel settingsPanel = new SettingsPanel();
+        mazePanel = new MazePanel();
 
-            panels = new JPanel(new CardLayout());
-            panels.add(settingsPanel, SETTINGS_PANEL);
-            panels.add(mazePanel, MAZE_PANEL);
+        panels = new JPanel(new CardLayout());
+        panels.add(settingsPanel, SETTINGS_PANEL);
+        panels.add(mazePanel, MAZE_PANEL);
 
-            window.add(panels);
-            window.pack();
-            window.setLocationRelativeTo(null);
+        window.add(panels);
+        window.pack();
+        window.setLocationRelativeTo(null);
 
-            window.setVisible(true);
-        });
+        window.setVisible(true);
     }
 
     public static void changeScene(String scene) {
