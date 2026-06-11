@@ -11,14 +11,19 @@ import java.util.List;
 
 public class MazeCanvas extends JPanel {
     private boolean[][] mazeMap;
-    private List<Coordinate> pathIndexes;
+    private List<Coordinate> coordinates;
     private int currentFrameIndex = 0;
 
     private Color wallColor;
     private Color gridColor;
     private Color pathColor;
 
+    private int cellSize;
+    private int startX;
+    private int startY;
+
     private BufferedImage backgroundLayer;
+    private BufferedImage pathLayer;
     private BufferedImage gridLayerOverlay;
 
     public MazeCanvas() {
@@ -27,7 +32,7 @@ public class MazeCanvas extends JPanel {
 
     public void setMazeData(boolean[][] map, List<Coordinate> path) {
         this.mazeMap = map;
-        this.pathIndexes = path;
+        this.coordinates = path;
 
         RenderConfig config = AppConfig.getRenderConfig();
 
@@ -36,55 +41,82 @@ public class MazeCanvas extends JPanel {
         pathColor = Color.decode(config.getPathColor());
 
         backgroundLayer = null;
+        pathLayer = null;
         gridLayerOverlay = null;
 
         resetAnimation();
-        repaint();
     }
 
     public void resetAnimation() {
         currentFrameIndex = 0;
+
+        if (pathLayer != null) {
+            Graphics2D g = pathLayer.createGraphics();
+            g.setComposite(AlphaComposite.Clear);
+            g.fillRect(0, 0, pathLayer.getWidth(), pathLayer.getHeight());
+            g.dispose();
+        }
+        repaint();
     }
 
     public boolean nextFrame() {
-        if (pathIndexes != null && currentFrameIndex < pathIndexes.size()) {
+        if (coordinates != null && currentFrameIndex < coordinates.size()) {
+            Coordinate point = coordinates.get(currentFrameIndex);
+
+            int x = startX + (point.x() * cellSize);
+            int y = startY + (point.y() * cellSize);
+
+            if (pathLayer != null) {
+                Graphics2D gPath = pathLayer.createGraphics();
+                gPath.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                gPath.setColor(pathColor);
+
+                gPath.fillRect(x, y, cellSize, cellSize);
+                gPath.dispose();
+            }
+
             currentFrameIndex++;
+            repaint(x, y, cellSize, cellSize);
             return true;
         }
         return false;
     }
 
-    private void preRenderBackground() {
+    private void preRenderLayers() {
         int width = getWidth();
         int height = getHeight();
 
         if (width <= 0 || height <= 0 || mazeMap == null) return;
 
         if (backgroundLayer != null) backgroundLayer.flush();
+        if (pathLayer != null) pathLayer.flush();
         if (gridLayerOverlay != null) gridLayerOverlay.flush();
 
-        // initialize both layers with transparency support
         backgroundLayer = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        pathLayer = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         gridLayerOverlay = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
         Graphics2D gWall = backgroundLayer.createGraphics();
+        Graphics2D gPath = pathLayer.createGraphics();
         Graphics2D gGrid = gridLayerOverlay.createGraphics();
 
         gWall.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        gPath.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         gGrid.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         int mHeight = mazeMap.length;
         int mWidth = mazeMap[0].length;
 
-        int cellSize = Math.min(width / mWidth, height / mHeight);
+        cellSize = Math.min(width / mWidth, height / mHeight);
         int totalMazePixelWidth = mWidth * cellSize;
         int totalMazePixelHeight = mHeight * cellSize;
 
-        int startX = (width - totalMazePixelWidth) / 2;
-        int startY = (height - totalMazePixelHeight) / 2;
+        startX = (width - totalMazePixelWidth) / 2;
+        startY = (height - totalMazePixelHeight) / 2;
 
         RenderConfig config = AppConfig.getRenderConfig();
 
+        // background
         for (int row = 0; row < mHeight; row++) {
             for (int col = 0; col < mWidth; col++) {
                 int rectX = startX + (col * cellSize);
@@ -95,6 +127,19 @@ public class MazeCanvas extends JPanel {
             }
         }
 
+        // path
+        if (coordinates != null && !coordinates.isEmpty()) {
+            gPath.setColor(pathColor);
+            int framesToDraw = Math.min(currentFrameIndex, coordinates.size());
+            for (int i = 0; i < framesToDraw; i++) {
+                Coordinate point = coordinates.get(i);
+                int x = startX + (point.x() * cellSize);
+                int y = startY + (point.y() * cellSize);
+                gPath.fillRect(x, y, cellSize, cellSize);
+            }
+        }
+
+        // grid
         if (config.isDrawGrid()) {
             gGrid.setColor(gridColor);
             for (int row = 0; row <= mHeight; row++) {
@@ -108,12 +153,13 @@ public class MazeCanvas extends JPanel {
         }
 
         gWall.dispose();
+        gPath.dispose();
         gGrid.dispose();
     }
 
     private boolean shouldPaintBackground() {
-        if (backgroundLayer == null || gridLayerOverlay == null) return true;
-        return (backgroundLayer.getWidth() != getWidth() || backgroundLayer.getHeight() != getHeight());
+        return backgroundLayer == null || pathLayer == null || gridLayerOverlay == null ||
+                backgroundLayer.getWidth() != getWidth() || backgroundLayer.getHeight() != getHeight();
     }
 
     @Override
@@ -123,37 +169,11 @@ public class MazeCanvas extends JPanel {
         super.paintComponent(g);
 
         if (mazeMap == null || mazeMap.length == 0) return;
-        if (shouldPaintBackground()) preRenderBackground();
 
-        // layer 1: maze background
+        if (shouldPaintBackground()) preRenderLayers();
+
         if (backgroundLayer != null) g.drawImage(backgroundLayer, 0, 0, null);
-
-        // layer 2: animated solution path
-        if (pathIndexes != null && !pathIndexes.isEmpty()) {
-            Graphics2D g2d = (Graphics2D) g.create();
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-            int mHeight = mazeMap.length;
-            int mWidth = mazeMap[0].length;
-            int cellSize = Math.min(getWidth() / mWidth, getHeight() / mHeight);
-            int totalMazePixelWidth = mWidth * cellSize;
-            int totalMazePixelHeight = mHeight * cellSize;
-            int startX = (getWidth() - totalMazePixelWidth) / 2;
-            int startY = (getHeight() - totalMazePixelHeight) / 2;
-
-            g2d.setColor(pathColor);
-            int framesToDraw = Math.min(currentFrameIndex, pathIndexes.size());
-            for (int i = 0; i < framesToDraw; i++) {
-                Coordinate point = pathIndexes.get(i);
-                int x = startX + (point.x() * cellSize);
-                int y = startY + (point.y() * cellSize);
-
-                g2d.fillRect(x, y, cellSize, cellSize);
-            }
-            g2d.dispose();
-        }
-
-        // layer 3: grid, this is drawn last, ensuring the grid always sits above the animated path
+        if (pathLayer != null) g.drawImage(pathLayer, 0, 0, null);
         if (gridLayerOverlay != null) g.drawImage(gridLayerOverlay, 0, 0, null);
 
         long renderTimeNs = System.nanoTime() - startTime;
