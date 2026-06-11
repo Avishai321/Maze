@@ -61,6 +61,54 @@ public class MazePanel extends JPanel {
         add(statusLabel, BorderLayout.NORTH);
     }
 
+    public void initialize() {
+        solveButton.setEnabled(false);
+        statusLabel.setText(" ");
+        mazeCanvas.setMazeData(null, null);
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+        worker = new SwingWorker<>() {
+            @Override
+            protected MazeResult doInBackground() throws Exception {
+                int mazeWidth = AppConfig.getMazeWidth();
+                int mazeHeight = AppConfig.getMazeHeight();
+
+                MazeRepository repo = new MazeRepository();
+                BufferedImage img = repo.fetchMazeImage(mazeWidth, mazeHeight);
+
+                MazeImageProcessor processor = new MazeImageProcessor();
+                boolean[][] tempMap = processor.extractMazeGrid(img, mazeWidth, mazeHeight);
+
+                BreadthFirstPathfinder pathfinder = new BreadthFirstPathfinder();
+                List<Coordinate> tempPath = pathfinder.findPath(tempMap);
+
+                return new MazeResult(tempMap, tempPath);
+            }
+
+            @Override
+            protected void done() {
+                if (isCancelled()) return;
+                setCursor(Cursor.getDefaultCursor());
+                try {
+                    MazeResult result = get();
+
+                    currentMazeMap = result.map();
+                    currentPath = result.path();
+
+                    mazeCanvas.setMazeData(currentMazeMap, currentPath);
+                    solveButton.setEnabled(true);
+                } catch (InterruptedException e) {
+                    logger.log(Level.WARNING, "Worker interrupted", e);
+                    Thread.currentThread().interrupt();
+                } catch (ExecutionException e) {
+                    logger.log(Level.SEVERE, "Failed pipeline", e.getCause());
+                    statusLabel.setText("Failed to load maze from server.");
+                }
+            }
+        };
+        worker.execute();
+    }
+
     private JButton createBackButton() {
         JButton btn = new StyledButton("Back", false);
         btn.addActionListener(e -> {
@@ -104,54 +152,5 @@ public class MazePanel extends JPanel {
         int animationDelay = AppConfig.getRenderConfig().getAnimationDelayMs();
         solveAnimation.setDelay(animationDelay);
         solveAnimation.restart();
-    }
-
-    public void initialize() {
-        solveButton.setEnabled(false);
-        statusLabel.setText(" ");
-        mazeCanvas.setMazeData(null, null);
-        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-        worker = new SwingWorker<>() {
-            @Override
-            protected MazeResult doInBackground() throws Exception {
-                int mazeWidth = AppConfig.getMazeWidth();
-                int mazeHeight = AppConfig.getMazeHeight();
-
-                MazeRepository repo = new MazeRepository();
-                BufferedImage img = repo.fetchMazeImage(mazeWidth, mazeHeight);
-
-                MazeImageProcessor processor = new MazeImageProcessor();
-                boolean[][] tempMap = processor.extractMazeGrid(img, mazeWidth, mazeHeight);
-
-                BreadthFirstPathfinder pathfinder = new BreadthFirstPathfinder();
-                List<Coordinate> tempPath = pathfinder.findPath(tempMap);
-
-                return new MazeResult(tempMap, tempPath);
-            }
-
-            @Override
-            protected void done() {
-                if (isCancelled()) return;
-                setCursor(Cursor.getDefaultCursor());
-                try {
-                    MazeResult result = get();
-
-                    currentMazeMap = result.map();
-                    currentPath = result.path();
-
-                    mazeCanvas.setMazeData(currentMazeMap, currentPath);
-                    solveButton.setEnabled(true);
-
-                } catch (InterruptedException e) {
-                    logger.log(Level.WARNING, "Worker interrupted", e);
-                    Thread.currentThread().interrupt();
-                } catch (ExecutionException e) {
-                    logger.log(Level.SEVERE, "Failed pipeline", e.getCause());
-                    statusLabel.setText("Failed to load maze from server.");
-                }
-            }
-        };
-        worker.execute();
     }
 }

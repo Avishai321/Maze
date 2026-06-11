@@ -14,7 +14,9 @@ import java.net.http.HttpResponse;
 public class MazeRepository {
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
-    public BufferedImage fetchMazeImage(int width, int height) throws IOException, InterruptedException {
+    public BufferedImage fetchMazeImage(int width, int height)
+            throws IOException, InterruptedException
+    {
         String url = AppConfig.BASE_IMAGE_URL + "?width=" + width + "&height=" + height;
 
         HttpRequest request = HttpRequest.newBuilder()

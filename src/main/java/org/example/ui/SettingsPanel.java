@@ -271,7 +271,7 @@ public class SettingsPanel extends JPanel {
         }
     }
 
-    public void fetchConfigs() {
+    private void fetchConfigs() {
         setAllLabels("Loading...", COLOR_LOADING);
         setActionButtonsEnable(false);
 

@@ -7,14 +7,14 @@ public final class AppConfig {
     public static final Dimension WINDOW_SIZE = new Dimension(620, 755);
     public static final Dimension WINDOW_MIN_SIZE = new Dimension(600, 600);
 
+    public static final int DEFAULT_MAZE_WIDTH = 30;
+    public static final int MIN_MAZE_WIDTH = 5;
+    public static final int MAX_MAZE_WIDTH = 100;
+
     public static final String CONFIG_URL = "https://backend-qcf9.onrender.com/fm1/get-render-config";
     public static final String BASE_IMAGE_URL = "https://backend-qcf9.onrender.com/fm1/get-maze-image";
 
     private static RenderConfig currentRenderConfig;
-
-    public static final int DEFAULT_MAZE_WIDTH = 30;
-    public static final int MIN_MAZE_WIDTH = 5;
-    public static final int MAX_MAZE_WIDTH = 100;
 
     private static int mazeWidth = -1;
     private static int mazeHeight = -1;

@@ -16,7 +16,7 @@ public class Window {
         initialize();
     }
 
-    public void initialize() {
+    private void initialize() {
         JFrame window = new JFrame(AppConfig.APP_TITLE);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setMinimumSize(AppConfig.WINDOW_MIN_SIZE);
@@ -36,7 +36,7 @@ public class Window {
         window.setVisible(true);
     }
 
-    public static void changeScene(String scene) {
+    protected static void changeScene(String scene) {
         CardLayout cardLayout = (CardLayout) panels.getLayout();
         cardLayout.show(panels, scene);
 
