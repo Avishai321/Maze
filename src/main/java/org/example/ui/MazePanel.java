@@ -12,8 +12,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class MazePanel extends JPanel {
     private MazeCanvas mazeCanvas;
@@ -25,8 +23,6 @@ public class MazePanel extends JPanel {
 
     private boolean[][] currentMazeMap;
     private List<Coordinate> currentPath;
-
-    private final Logger logger = Logger.getLogger(MazePanel.class.getName());
 
     private record MazeResult(boolean[][] map, List<Coordinate> path) {}
 
@@ -95,13 +91,15 @@ public class MazePanel extends JPanel {
                     currentMazeMap = result.map();
                     currentPath = result.path();
 
+                    System.out.println(currentPath != null && !currentPath.isEmpty() ? "Has Solution" : "No Solution");
+
                     mazeCanvas.setMazeData(currentMazeMap, currentPath);
                     solveButton.setEnabled(true);
                 } catch (InterruptedException e) {
-                    logger.log(Level.WARNING, "Worker interrupted", e);
+                    System.err.println("Worker interrupted");
                     Thread.currentThread().interrupt();
                 } catch (ExecutionException e) {
-                    logger.log(Level.SEVERE, "Failed pipeline", e.getCause());
+                    System.err.println("Failed pipeline");
                     statusLabel.setText("Failed to load maze from server.");
                 }
             }
