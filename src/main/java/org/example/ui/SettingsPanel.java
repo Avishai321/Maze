@@ -97,7 +97,7 @@ public class SettingsPanel extends JPanel {
 
         // --- Row 0: Wall Cell Color ---
         cKey.gridy = 0; cVal.gridy = 0;
-        panel.add(createKeyLabel("Wall Cell Color:"), cKey);
+        panel.add(createKeyLabel("Wall Color:"), cKey);
         wallCellColorValue = createValueLabel();
         panel.add(wallCellColorValue, cVal);
 
@@ -121,7 +121,7 @@ public class SettingsPanel extends JPanel {
 
         // --- Row 4: Animation Delay ---
         cKey.gridy = 4; cVal.gridy = 4;
-        panel.add(createKeyLabel("Animation Delay:"), cKey);
+        panel.add(createKeyLabel("Delay:"), cKey);
         animationDelayValue = createValueLabel();
         panel.add(animationDelayValue, cVal);
 
@@ -188,17 +188,8 @@ public class SettingsPanel extends JPanel {
             widthSpinner.setValue(selectedWidth);
             heightSpinner.setValue(selectedHeight);
 
-            RenderConfig currentConfig = AppConfig.getRenderConfig();
-            if (currentConfig == null) {
-                JOptionPane.showMessageDialog(this,
-                        "Please wait for configurations to load before generating a maze.",
-                        "Configuration Pending",
-                        JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
             AppConfig.setMazeDimensions(selectedWidth, selectedHeight);
-            Window.changeScene(Window.MAZE_PANEL);
+            Window.changeScene(Window.Panel.MAZE_PANEL);
         });
         getMazeButton.setEnabled(false);
 
@@ -286,9 +277,18 @@ public class SettingsPanel extends JPanel {
             }
 
             @Override
-            public void onError(Exception e) {
+            public void onError(ConfigService.ErrorType type) {
                 refreshButton.setEnabled(true);
-                SwingUtilities.invokeLater(() -> setAllLabels("Connection Error", COLOR_ERROR));
+                SwingUtilities.invokeLater(() -> {
+                    String message = "Error";
+
+                    if (type.equals(ConfigService.ErrorType.PARSE)) message = "Invalid data";
+                    else if (type.equals(ConfigService.ErrorType.UNKNOWN)) message = "Unknown Error";
+                    else if (type.equals(ConfigService.ErrorType.SERVER)) message = "Bad-Status";
+                    else if (type.equals(ConfigService.ErrorType.NETWORK)) message = "Unreachable";
+
+                    setAllLabels(message, COLOR_ERROR);
+                });
             }
         };
 
