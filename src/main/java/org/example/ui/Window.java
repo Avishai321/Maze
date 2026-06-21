@@ -6,17 +6,25 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Window {
-    public static final String SETTINGS_PANEL = "SETTINGS_PANEL";
-    public static final String MAZE_PANEL = "MAZE_PANEL";
+    public  enum Panel {
+        SETTINGS_PANEL("SETTINGS_PANEL"),
+        MAZE_PANEL("MAZE_PANEL");
+
+        private final String value;
+
+        Panel(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
 
     private static JPanel panels;
     private static MazePanel mazePanel;
 
     public Window() {
-        initialize();
-    }
-
-    private void initialize() {
         JFrame window = new JFrame(AppConfig.APP_TITLE);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setMinimumSize(AppConfig.WINDOW_MIN_SIZE);
@@ -26,8 +34,8 @@ public class Window {
         mazePanel = new MazePanel();
 
         panels = new JPanel(new CardLayout());
-        panels.add(settingsPanel, SETTINGS_PANEL);
-        panels.add(mazePanel, MAZE_PANEL);
+        panels.add(settingsPanel, Panel.SETTINGS_PANEL.getValue());
+        panels.add(mazePanel, Panel.MAZE_PANEL.getValue());
 
         window.add(panels);
         window.pack();
@@ -36,11 +44,11 @@ public class Window {
         window.setVisible(true);
     }
 
-    protected static void changeScene(String scene) {
+    protected static void changeScene(Panel panel) {
         CardLayout cardLayout = (CardLayout) panels.getLayout();
-        cardLayout.show(panels, scene);
+        cardLayout.show(panels, panel.getValue());
 
-        if (scene.equals(MAZE_PANEL)) {
+        if (panel.equals(Panel.MAZE_PANEL)) {
             mazePanel.initialize();
         }
     }

@@ -14,6 +14,8 @@ public class MazeCanvas extends JPanel {
     private List<Coordinate> coordinates;
     private int currentFrameIndex = 0;
 
+    private RenderConfig renderConfig;
+
     private Color wallColor;
     private Color gridColor;
     private Color pathColor;
@@ -34,11 +36,11 @@ public class MazeCanvas extends JPanel {
         this.mazeMap = map;
         this.coordinates = path;
 
-        RenderConfig config = AppConfig.getRenderConfig();
+        renderConfig = AppConfig.getRenderConfig();
 
-        wallColor = Color.decode(config.getWallCellColor());
-        gridColor = Color.decode(config.getGridColor());
-        pathColor = Color.decode(config.getPathColor());
+        wallColor = Color.decode(renderConfig.getWallCellColor());
+        gridColor = Color.decode(renderConfig.getGridColor());
+        pathColor = Color.decode(renderConfig.getPathColor());
 
         backgroundLayer = null;
         pathLayer = null;
@@ -114,8 +116,6 @@ public class MazeCanvas extends JPanel {
         startX = (width - totalMazePixelWidth) / 2;
         startY = (height - totalMazePixelHeight) / 2;
 
-        RenderConfig config = AppConfig.getRenderConfig();
-
         // background
         for (int row = 0; row < mHeight; row++) {
             for (int col = 0; col < mWidth; col++) {
@@ -140,7 +140,7 @@ public class MazeCanvas extends JPanel {
         }
 
         // grid
-        if (config.isDrawGrid()) {
+        if (renderConfig.isDrawGrid()) {
             gGrid.setColor(gridColor);
             for (int row = 0; row <= mHeight; row++) {
                 int y = startY + (row * cellSize);

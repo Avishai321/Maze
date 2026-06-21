@@ -1,5 +1,6 @@
 package org.example.image;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class MazeImageProcessor {
@@ -14,9 +15,7 @@ public class MazeImageProcessor {
                 int sampleX = (col * cellWidth) + (cellWidth / 2);
                 int sampleY = (row * cellHeight) + (cellHeight / 2);
 
-                int rgb = image.getRGB(sampleX, sampleY);
-                boolean isWhite = (rgb & 0x00FFFFFF) == 0x00FFFFFF;
-
+                boolean isWhite = Color.WHITE.equals(new Color(image.getRGB(sampleX, sampleY)));
                 mazeMap[row][col] = isWhite;
             }
         }

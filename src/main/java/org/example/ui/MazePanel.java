@@ -95,12 +95,12 @@ public class MazePanel extends JPanel {
 
                     mazeCanvas.setMazeData(currentMazeMap, currentPath);
                     solveButton.setEnabled(true);
-                } catch (InterruptedException e) {
-                    System.err.println("Worker interrupted");
-                    Thread.currentThread().interrupt();
                 } catch (ExecutionException e) {
                     System.err.println("Failed pipeline");
                     statusLabel.setText("Failed to load maze from server.");
+                } catch (InterruptedException e) {
+                    System.err.println("Worker interrupted");
+                    Thread.currentThread().interrupt();
                 }
             }
         };
@@ -112,7 +112,7 @@ public class MazePanel extends JPanel {
         btn.addActionListener(e -> {
             if (solveAnimation != null && solveAnimation.isRunning()) solveAnimation.stop();
             if (worker != null && !worker.isDone()) worker.cancel(true);
-            Window.changeScene(Window.SETTINGS_PANEL);
+            Window.changeScene(Window.Panel.SETTINGS_PANEL);
         });
         return btn;
     }
